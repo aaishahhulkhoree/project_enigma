@@ -68,8 +68,19 @@ def main():
     print(f"  Positions  : {positions}")
     print(f"  Plugboard  : {', '.join(plug_pairs)}\n")
 
-    message = args.msg.upper()
-    print(f"Message clair : {message}\n")
+    #message = args.msg.upper()
+    #print(f"Message clair : {message}\n")
+
+    # --- saisie utilisateur ---
+    try:
+        message = input("Entre le message à chiffrer : ").strip()
+    except (KeyboardInterrupt, EOFError):
+        print("\nAnnulé.")
+        return
+
+    if not message:
+        print("Aucun message saisi. Fin.")
+        return
 
     cipher = machine.encrypt(message, keep_spaces=True, group_5=args.group5)
     print(f"Message chiffré : {cipher}")
