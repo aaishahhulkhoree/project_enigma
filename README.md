@@ -20,12 +20,13 @@ L’objectif est pédagogique :
 
 ## Structure du projet
 
+```text
 project_enigma/
 ├─ src/
 │ ├─ components/
-│ │ ├─ plugboard.py # Module de câblage initial 
-│ │ ├─ reflecteur.py # Module de réflexion 
-│ │ └─ rotor.py # (à créer)
+│ │ ├─ plugboard.py  
+│ │ ├─ reflecteur.py 
+│ │ └─ rotor.py
 │ ├─ configuration/
 │ │ └─ settings.py
 │ ├─ utils/
@@ -35,10 +36,9 @@ project_enigma/
 ├─ tests/
 │ └─ test_plugboard.py
 └─ README.md
-
+```
 ---
 
----
 
 ## Installation
 
@@ -47,22 +47,25 @@ project_enigma/
 git clone https://github.com/aaishahhulkhoree/project_enigma
 cd project_enigma
 ```
+--- 
 ### Créer un environnement virtuel 
 ```
 python -m venv .venv
 source .venv/bin/activate       # Linux / macOS
 .venv\Scripts\activate          # Windows
 ```
+---
 ### Installer les dépendances 
 ```
 pip install -r requirements.txt
 ```
+---
 ## Execution 
 Pour lancer le projet 
 ```
 python src/main.py
 ```
-
+---
 © 2025 – Project Enigma Python
 
 
