@@ -1,5 +1,5 @@
 from typing import Dict, Iterable, Optional, Tuple
-from utils import assertionError
+from utils.nettoyage import assertionError
 from utils.nettoyage import est_majuscule, est_liste_paires_valides
 
 MAX_PAIRES = 10
@@ -8,7 +8,7 @@ ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 class Plugboard:
     """Classe Plugboard pour gérer les connexions du plugboard."""
     def __init__(self, paires: Iterable[str] | None = None) -> None:
-        self.plugboard = Dict[str, str]()
+        self.plugboard : Dict[str, str] = {}
         if paires:
             self.configurer(paires)
 
@@ -64,7 +64,7 @@ class Plugboard:
             assertionError("Seules les lettres A–Z sont autorisées.")
         if a == b:
             assertionError("Impossible de connecter une lettre à elle-même.")
-        if self.is_connected(a) or self.is_connected(b):
+        if self.est_connectee(a) or self.est_connectee(b):
             assertionError("Une des lettres est déjà connectée.")
         self.plugboard[a] = b
         self.plugboard[b] = a
