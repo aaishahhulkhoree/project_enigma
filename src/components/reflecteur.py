@@ -1,5 +1,6 @@
 from typing import Dict
 from utils import assertionError
+from configuration.configuration import REFLECTORS
 
 ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
