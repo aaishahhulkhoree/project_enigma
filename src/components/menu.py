@@ -3,7 +3,7 @@ import os
 import json
 from datetime import date
 
-
+from components.ui import demander_choix, demander_texte
 from components.machineEnigma import MachineEnigma
 from configuration.configuration import load_codebook #recupère la fonction load_codebook
 
@@ -11,6 +11,12 @@ class Menu:
 
     @staticmethod
     def choix_prompt(prompt, valid_choices, allow_back=False, allow_quit=False):
+        """
+        Affiche un prompt texte + éventuellement:
+        - R: Retour
+        - Q: Quitter
+        et renvoie le choix validé.
+        """
         extra = []
         if allow_back:
             extra.append("R: Retour")
@@ -18,9 +24,19 @@ class Menu:
             extra.append("Q: Quitter")
         if extra:
             prompt += "\n" + " / ".join(extra)
+        else :
+            prompt += "\n"
 
         while True:
-            choix = input(f"{prompt}\n> ").strip().upper()
+            #choix = input(f"{prompt}\n> ").strip().upper()
+
+            choix = demander_texte("Menu Enigma", prompt)
+            if choix is None:
+            # utilisateur a fermé la fenêtre → on peut décider de quitter
+                return "Q" if allow_quit else None
+
+            choix = choix.strip().upper()
+
             if allow_back and choix == "R":
                 return "R"
             if allow_quit and choix == "Q":
@@ -159,8 +175,7 @@ class Menu:
         print("1. Chiffrer un message")
         print("2. Déchiffrer un message")
         print("3. Quitter")
-        #choix = input("Votre choix: ").strip()
-        return Menu.choix_prompt("Sélectionnez une option (1/2/3):", {"1", "2", "3"}, allow_quit=True)
+        return Menu.choix_prompt("Sélectionnez une option (1/2/3):", {"1", "2", "3"})
     
     @staticmethod
     def configurer_manuellement():

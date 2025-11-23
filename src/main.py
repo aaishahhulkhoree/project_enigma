@@ -52,7 +52,7 @@ def main():
         reflector_preset="B",
     )
 
-    msg = input("Message à chiffrer : ").strip()
+    m1g = input("Message à chiffrer : ").strip()
     if not msg:
         print("Aucun message entré.")
         return
