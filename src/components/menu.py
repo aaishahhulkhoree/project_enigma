@@ -1,4 +1,11 @@
 import string 
+import os 
+import json
+from datetime import date
+
+
+from components.machineEnigma import MachineEnigma
+from configuration.configuration import load_codebook #recupère la fonction load_codebook
 
 class Menu:
 
@@ -22,6 +29,9 @@ class Menu:
                 return choix
             print("Choix invalide. Réessayez.")
 
+    # -------------------------------------------
+    # Fonctions pour demander les configurations MANUELLEMENT 
+    # -------------------------------------------
     @staticmethod
     def demander_rotors(n=3):
         while True:
@@ -113,17 +123,44 @@ class Menu:
                 used_letters.update([a, b])
                 pairs.append(token)
         return pairs
+    
+    #-------------------------------------------
+    # Fonction pour charger la config du jour depuis le livre de code AUTOMATIQUEMENT
+    #-------------------------------------------
+    
+    def charger_config_livre_code():
+        """Charge la config du jour depuis data/livre_code.json."""
 
-    #***MENU***
+        # on remonte de components/ vers src/, puis on va dans data/
+        base_dir = os.path.dirname(os.path.dirname(__file__))
+        codebook_path = os.path.join(base_dir, "data", "livre_code.json")
+
+        with open(codebook_path, "r", encoding="utf-8") as f:
+            data = json.load(f)
+
+        today = date.today().isoformat()
+        if today in data:
+            date_str = today
+        else:
+            date_str = sorted(data.keys())[-1]
+
+        print(f"Configuration du livre de code pour la date : {date_str}")
+        return load_codebook(codebook_path, date_str)
+
+
+
+    #-------------------------------------------
+    # Menu principal et navigation
+    #-------------------------------------------
     @staticmethod   
     def afficher_menu():
         print("****** Menu Enigma Simulator ******")
         print("Veuillez choisir une option :")
         print("1. Chiffrer un message")
         print("2. Déchiffrer un message")
-        print("Q. Quitter")
+        print("3. Quitter")
         #choix = input("Votre choix: ").strip()
-        return Menu.choix_prompt("Sélectionnez une option (1/2/Q):", {"1", "2", "Q"}, allow_quit=True)
+        return Menu.choix_prompt("Sélectionnez une option (1/2/3):", {"1", "2", "3"}, allow_quit=True)
     
     @staticmethod
     def configurer_manuellement():
@@ -151,10 +188,16 @@ class Menu:
             if choix == "R":
                 return None
             if choix == "1":
-                print("Configuration du jour sélectionnée.")
-                return {"mode": "livre_de_code"}
+                #print("Configuration du jour sélectionnée.")
+                entry = Menu.charger_config_livre_code()
+                return {
+                    "mode": "livre_de_code",
+                    "rotors": entry["rotors"],
+                    "positions": list(entry["positions"]), 
+                    "plugboard": entry["plugboard"],
+                }
             if choix == "2":
-                cfg = Menu._config_manuel()
+                cfg = Menu.configurer_manuellement()
                 if cfg is None:
                     continue
                 return cfg
@@ -166,18 +209,51 @@ class Menu:
             print("1. Utiliser les configurations du jour (livre de code)")
             print("2. Entrer manuellement les rotors, positions et plugboard")
             print("R. Retour")
-            choix = Menu._prompt_choice("Votre choix (1/2) ?", {"1", "2"}, allow_back=True)
+            choix = Menu.choix_prompt("Votre choix (1/2) ?", {"1", "2"}, allow_back=True)
 
             if choix == "R":
                 return None
             if choix == "1":
-                print("Configuration du jour sélectionnée.")
-                return {"mode": "livre_de_code"}
+                #print("Configuration du jour sélectionnée.")
+                entry = Menu.charger_config_livre_code()
+                return {
+                    "mode": "livre_de_code",
+                    "rotors": entry["rotors"],
+                    "positions": list(entry["positions"]), 
+                    "plugboard": entry["plugboard"],
+                }
             if choix == "2":
-                cfg = Menu._config_manuel()
+                cfg = Menu.configurer_manuellement()
                 if cfg is None:
                     continue
                 return cfg
+            
+    #-------------------------------------------
+    # Fonction pour lancer la machine Enigma avec la config donnée
+    #-------------------------------------------
+    @staticmethod
+    def lancer_machine(config, mode: str):
+        """Crée la machine Enigma avec la config et chiffre/déchiffre un message."""
+        rotors = config["rotors"]
+        positions = "".join(config["positions"])
+        plugboard = config["plugboard"]
+
+        machine = MachineEnigma(
+            rotors_names=rotors,
+            positions=positions,
+            plug_pairs=plugboard,
+            reflector_preset="B",
+        )
+
+        texte = input(f"Entrez le message à {mode} : ").strip()
+        if not texte:
+            print("Aucun texte saisi.")
+            return
+
+        # Enigma est symétrique : même fonction pour chiffrer et déchiffrer
+        resultat = machine.encrypt(texte, keep_spaces=True, group_5=True)
+        print(f"\nTexte {mode} : {resultat}\n")
+
     
     @staticmethod
     def quitter():
@@ -195,14 +271,14 @@ class Menu:
                 if config is None:
                     continue
                 print("Configuration sélectionnée:", config)
-                # TODO : oublies pas d'ajouter la suite pour chiffrer le message, 
+                Menu.lancer_machine(config, mode="chiffrer") 
                     
             elif choix == "2":
                 config = Menu.menu_dechiffrement()
                 if config is None:
                     continue
                 print("Configuration sélectionnée:", config)
-                #TODO:  oublies pas d'ajouter la suite pour déchiffrer le message,
+                Menu.lancer_machine(config, mode="déchiffrer")
 
             elif choix == "3":
                 Menu.quitter()

@@ -8,8 +8,9 @@ import sys
 import os
 from datetime import date
 import argparse
+import json
 
-# --- forcer src/ dans sys.path pour éviter conflits de "utils" ---
+# --- mettre src/ dans sys.path pour éviter conflits de "utils" ---
 sys.path.insert(0, os.path.dirname(__file__))
 
 from components.machineEnigma import MachineEnigma
@@ -18,20 +19,13 @@ from configuration.configuration import load_codebook
 
 def charger_config_auto(codebook_path: str):
     """Charge automatiquement la config du jour ou la dernière date disponible."""
-    import json
-    from datetime import date
-
     with open(codebook_path, "r", encoding="utf-8") as f:
         data = json.load(f)
 
     today = date.today().isoformat()
-    if today in data:
-        date_str = today
-    else:
-        # si la date du jour n'existe pas, on prend la dernière date triée
-        date_str = sorted(data.keys())[-1]
+    date_str = today if today in data else sorted(data.keys())[-1]
 
-    print(f"Configuration chargée pour la date : {date_str}")
+    print(f"Configuration auto chargée pour {date_str}")
     return load_codebook(codebook_path, date_str)
 
 
@@ -51,39 +45,23 @@ def main():
     else:
         entry = charger_config_auto(codebook_path)
 
-    rotor_names = entry["rotors"]
-    positions = entry["positions"]
-    plug_pairs = entry["plugboard"]
-
-    # Initialiser la machine
     machine = MachineEnigma(
-        rotors_names=rotor_names,
-        positions=positions,
-        plug_pairs=plug_pairs,
+        rotors_names=entry["rotors"],
+        positions=entry["positions"],
+        plug_pairs=entry["plugboard"],
         reflector_preset="B",
     )
 
-    print("Machine Enigma initialisée :")
-    print(f"  Rotors     : {rotor_names}")
-    print(f"  Positions  : {positions}")
-    print(f"  Plugboard  : {', '.join(plug_pairs)}\n")
-
-    #message = args.msg.upper()
-    #print(f"Message clair : {message}\n")
-
-    # --- saisie utilisateur ---
-    try:
-        message = input("Entre le message à chiffrer : ").strip()
-    except (KeyboardInterrupt, EOFError):
-        print("\nAnnulé.")
+    msg = input("Message à chiffrer : ").strip()
+    if not msg:
+        print("Aucun message entré.")
         return
 
-    if not message:
-        print("Aucun message saisi. Fin.")
-        return
-
-    cipher = machine.encrypt(message, keep_spaces=True, group_5=args.group5)
-    print(f"Message chiffré : {cipher}")
+    print(machine.encrypt(msg, keep_spaces=True, group_5=args.group5))
 
 if __name__ == "__main__":
-    main()
+    if len(sys.argv) == 1:
+        from components.menu import Menu
+        Menu.main_menu()
+    else:
+        main()
