@@ -3,6 +3,10 @@ from typing import Dict, List, Tuple
 
 ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
+# Définitions des rotors et réflecteurs
+# Format: "RotorName": (wiring_str, notch_str)
+# wiring_str: 26 lettres indiquant le câblage
+# notch_str: lettres où le rotor fait avancer le rotor suivant
 ROTORS: Dict[str, Tuple[str, str]] = {
     "I":   ("EKMFLGDQVZNTOWYHXUSPAIBRCJ", "Q"),
     "II":  ("AJDKSIRUXBLHWTMCQGZNPYFVOE", "E"),
@@ -11,7 +15,12 @@ ROTORS: Dict[str, Tuple[str, str]] = {
     "V":   ("VZBRGITYUPSDNHLXAWMJQOFECK", "Z"),
 }
 
+# Définitions des réflecteurs UKW-B et UKW-C
+# Format: "ReflectorName": wiring_str
+# wiring_str: 26 lettres indiquant le câblage
+# Exemple: A<->Y, B<->R, etc.
 REFLECTORS: Dict[str, str] = {
+    "A": "EJMZALYXVBWFCRQUONTSPIKHGD",
     "B": "YRUHQSLDPXNGOKMIEBFZCWVJAT",
     "C": "FVPJIAOYEDRZXWGCTKUQSBNMHL",
 }
