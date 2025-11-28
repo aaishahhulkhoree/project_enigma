@@ -122,3 +122,73 @@ def popup_menu(title, message, options, include_back=False):
 
     root.wait_window(win)
     return result["choice"]
+
+
+def input_dialog(title, message, initial_value: str = "", allow_back: bool = False) -> str | None:
+    """
+    Affiche une fenêtre centrée avec un texte (message), un champ de saisie, 
+    bouton 'Valider', bouton 'Retour' (si allow_back=True)
+    Retourne la chaîne saisie, ou None si l'utilisateur clique sur Retour ou ferme la fenêtre.
+    """
+    win = tk.Toplevel(root)
+    win.title(title)
+    win.resizable(False, False)
+    win.grab_set()
+
+    win.minsize(450, 200)
+    win.update_idletasks()
+    center_window(win)
+
+    style = ttk.Style(win)
+    try:
+        style.theme_use("clam")
+    except tk.TclError:
+        pass
+
+    style.configure(
+        "Menu.TButton",
+        padding=6,
+        font=("Segoe UI", 10)
+    )
+    style.configure(
+        "Return.TButton",
+        padding=6,
+        font=("Segoe UI", 10, "bold")
+    )
+
+    frame = ttk.Frame(win, padding=20)
+    frame.pack(fill="both", expand=True)
+
+    lbl = ttk.Label(frame, text=message, justify="center", wraplength=400)
+    lbl.pack(pady=(0, 10))
+
+    var = tk.StringVar(value=initial_value)
+    entry = ttk.Entry(frame, textvariable=var, width=40)
+    entry.pack(pady=(0, 15))
+    entry.focus_set()
+
+    result = {"text": None}
+
+    def on_ok():
+        result["text"] = var.get()
+        win.destroy()
+
+    def on_back():
+        result["text"] = None
+        win.destroy()
+
+    btn_frame = ttk.Frame(frame)
+    btn_frame.pack()
+
+    btn_ok = ttk.Button(btn_frame, text="Valider", style="Menu.TButton", command=on_ok)
+    btn_ok.grid(row=0, column=0, padx=5)
+
+    if allow_back:
+        btn_back = ttk.Button(btn_frame, text="Retour", style="Return.TButton", command=on_back)
+        btn_back.grid(row=0, column=1, padx=5)
+
+    win.bind("<Return>", lambda e: on_ok())
+    win.bind("<Escape>", lambda e: on_back())
+
+    root.wait_window(win)
+    return result["text"]

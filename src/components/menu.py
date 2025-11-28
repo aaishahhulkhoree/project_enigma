@@ -3,7 +3,7 @@ import os
 import json
 from datetime import date
 
-from components.ui import demander_texte, show_info, show_error, demander_rotors_gui, popup_menu
+from components.ui import demander_texte, show_info, show_error, demander_rotors_gui, popup_menu, input_dialog
 from components.machineEnigma import MachineEnigma
 from configuration.configuration import load_codebook #recupère la fonction load_codebook
 
@@ -59,12 +59,13 @@ class Menu:
     @staticmethod
     def demander_positions(n=3):
         while True:
-            #positions_input = input(f"Entrez les {n} positions initiales des rotors (ex: A B C): ").strip()
-            saisie = demander_texte(
+            saisie = input_dialog(
                 "Positions des rotors",
-                f"Entrez les {n} positions initiales (ex: A B C ou ABC):"
+                f"Entrez les {n} positions initiales (ex: A B C ou ABC) :",
+                allow_back=True
             )
             if saisie is None:
+                # Retour / annulation
                 return None
             
             positions = saisie.strip().upper().replace(" ", "")
@@ -74,43 +75,40 @@ class Menu:
                     f"Vous devez entrer exactement {n} lettres A-Z (ex: A B C ou ABC)."
                 )
                 continue
-            #la suite du code attend une liste, donc on met bien une liste:
+
             return list(positions)
+
 
 
     @staticmethod
     def demander_plugboard(max_paires=10, allow_back=True):
         alphabet = set(string.ascii_uppercase)
 
-        #Soit 1)Demander si on veut max paires ou non
+        # 1) Demander si on veut max_paires ou non
         while True:
-            saisie = demander_texte(
+            saisie = input_dialog(
                 "Plugboard",
                 f"Souhaitez-vous {max_paires} connexions de plugboard (complexité max) ?\n"
-                "Répondez O (oui), N (non) ou R (retour)."
+                "Répondez O (oui) ou N (non).",
+                allow_back=allow_back
             )
             if saisie is None:
                 return None
 
             choix = saisie.strip().lower()
-            if allow_back and choix == "r":
-                return None
             if choix in ("o", "oui"):
                 target_pairs = max_paires
                 break
             if choix in ("n", "non"):
-                nb = demander_texte(
+                nb = input_dialog(
                     "Plugboard",
-                    f"Combien de connexions souhaitez-vous ? (0 à {max_paires})\n"
-                    "Ou R pour retour."
+                    f"Combien de connexions souhaitez-vous ? (0 à {max_paires}) :",
+                    allow_back=allow_back
                 )
                 if nb is None:
                     return None
-                nb = nb.strip().lower()
-                if allow_back and nb == "r":
-                    return None
                 try:
-                    target_pairs = int(nb)
+                    target_pairs = int(nb.strip())
                     if 0 <= target_pairs <= max_paires:
                         break
                     else:
@@ -118,18 +116,19 @@ class Menu:
                 except ValueError:
                     show_error("Erreur plugboard", "Entrez un entier valide.")
             else:
-                show_error("Erreur plugboard", "Répondez par O, N ou R.")
+                show_error("Erreur plugboard", "Répondez par O (oui) ou N (non).")
 
         if target_pairs == 0:
             return []
 
-        #Soit 2)Demander les paires en une seule fois
+        # 2) Demander les paires en une seule fois
         while True:
-            saisie = demander_texte(
+            saisie = input_dialog(
                 "Plugboard",
                 f"Saisissez {target_pairs} paires sous forme AB CD EF ...\n"
                 "Sans chevauchement de lettres.\n"
-                "Exemple : AQ WS ED RF..."
+                "Exemple : AQ WS ED RF...",
+                allow_back=allow_back
             )
             if saisie is None:
                 return None
@@ -171,7 +170,6 @@ class Menu:
 
             if ok:
                 return pairs
-
     
     #-------------------------------------------
     # Fonction pour charger la config du jour depuis le livre de code AUTOMATIQUEMENT
@@ -311,10 +309,11 @@ class Menu:
             reflector_preset="B",
         )
 
-        texte = demander_texte("Message", f"Entrez le message à {mode} :")
+        texte = input_dialog("Message", f"Entrez le message à {mode} :", allow_back=True)
         if texte is None or not texte.strip():
             show_error("Erreur", "Aucun texte saisi.")
             return
+
 
         # Enigma est symétrique : même fonction pour chiffrer et déchiffrer
         resultat = machine.encrypt(texte, keep_spaces=True, group_5=True)
