@@ -3,49 +3,12 @@ import os
 import json
 from datetime import date
 
-from components.ui import demander_texte, show_info, show_error, demander_rotors_gui, popup_menu, input_dialog
+from components.ui import show_info, show_error, demander_rotors_gui, popup_menu, input_dialog
 from components.machineEnigma import MachineEnigma
 from configuration.configuration import load_codebook #recupère la fonction load_codebook
 
 class Menu:
-
-    @staticmethod
-    def choix_prompt(prompt, valid_choices, allow_back=False, allow_quit=False):
-        """
-        Affiche un prompt texte + éventuellement:
-        - R: Retour
-        - Q: Quitter
-        et renvoie le choix validé.
-        """
-        extra = []
-        if allow_back:
-            extra.append("R: Retour")
-        if allow_quit:
-            extra.append("Q: Quitter")
-        if extra:
-            prompt += "\n" + " / ".join(extra)
-        else :
-            prompt += "\n"
-
-        while True:
-            #choix = input(f"{prompt}\n> ").strip().upper()
-
-            choix = demander_texte("Menu Enigma", prompt)
-            if choix is None:
-            # utilisateur a fermé la fenêtre → on peut décider de quitter
-                return "Q" if allow_quit else None
-
-            choix = choix.strip().upper()
-
-            if allow_back and choix == "R":
-                return "R"
-            if allow_quit and choix == "Q":
-                return "Q"
-            if choix in valid_choices:
-                return choix
-            #print("Choix invalide. Réessayez.")
-            show_error("Choix invalide", "Choix invalide. Réessayez.")
-
+    
     # -------------------------------------------
     # Fonctions pour demander les configurations MANUELLEMENT 
     # -------------------------------------------
