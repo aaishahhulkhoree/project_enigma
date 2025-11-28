@@ -20,67 +20,86 @@ class MachineEnigma:
         ring_settings: List[int] | None = None,
     ) -> None:
         """
-        rotors_names: ["LEFT", "MIDDLE", "RIGHT"]
-        positions:    "LMR" (ex: "DCA")
-        ring_settings: [L, M, R] en 0..25 (par défaut [0,0,0])
+        rotors_names: liste de nom de rotors, de gauche à droite 
+                        ex: ["I", "II", "III"] pour 3 rotors
+                        ex : ["I", "II", "IV", "V"] pour 4 rotors ...
+        positions:    chaine des positions initiales, meme longueur que rotor_names attention
+        ring_settings: liste des ring settings(0-25) pour chaque rotor, meme longueur que rotor_names
         """
-        if len(rotors_names) != 3:
-            raise ValueError("Il faut exactement 3 rotors: [LEFT, MIDDLE, RIGHT].")
-        if len(positions) != 3:
+        n = len(rotors_names)
+        if n < 3 or n > 8:
+            raise ValueError("Le nombre de rotors doit être entre 3 et 8.")
+        if len(positions) != n:
             raise ValueError("positions doit être une chaîne de 3 lettres (LEFT,MIDDLE,RIGHT).")
 
-        self.left_name, self.mid_name, self.right_name = [x.upper() for x in rotors_names]
-        L_pos, M_pos, R_pos = positions.upper()
+        #self.left_name, self.mid_name, self.right_name = [x.upper() for x in rotors_names]
+        #L_pos, M_pos, R_pos = positions.upper()
 
-        ring_settings = ring_settings or [0, 0, 0]
-        if len(ring_settings) != 3:
-            raise ValueError("ring_settings doit être de longueur 3 (LEFT,MIDDLE,RIGHT).")
+        if ring_settings is None:
+            ring_settings = [0] * n  # par défaut, tous à 0
+        if len(ring_settings) != n:
+            raise ValueError("ring_settings doit être une liste de même longueur que rotors_names.")
 
         # Composants
         self.plugboard = Plugboard(plug_pairs or [])
         self.reflector = Reflecteur(preset=reflector_preset)
 
-        # Rotors (instanciés gauche→milieu→droite)
-        self.left: Rotor = create_rotor(self.left_name, position=L_pos, ring_setting=ring_settings[0])
-        self.middle: Rotor = create_rotor(self.mid_name, position=M_pos, ring_setting=ring_settings[1])
-        self.right: Rotor = create_rotor(self.right_name, position=R_pos, ring_setting=ring_settings[2])
+        # Rotors (instanciés gauche-->milieu-->droite) POUR 3 ROTORS
+        #self.left: Rotor = create_rotor(self.left_name, position=L_pos, ring_setting=ring_settings[0])
+        #self.middle: Rotor = create_rotor(self.mid_name, position=M_pos, ring_setting=ring_settings[1])
+        #self.right: Rotor = create_rotor(self.right_name, position=R_pos, ring_setting=ring_settings[2])
+
+        # Rotors : liste de gauche -> droite
+        self.rotor_names = [name.upper() for name in rotors_names]
+        self.rotors: List[Rotor] = []
+        for name, pos_letter, ring in zip(self.rotor_names, positions, ring_settings):
+            self.rotors.append(create_rotor(name, position=pos_letter, ring_setting=ring))
 
     # ---------------- Stepping (double-step correct) ----------------
     def _step_rotors(self) -> None:
+        """ Règle:
+        -Le rotor le plus à droite avance à chaque frappe
+        -Tout rotor qui est sur son cran (at_notch) avance
+        -Le rotor immédiatement à gauche d'un rotor sur son cran avance aussi
+          (double-stepping)
+        Cela reproduit le comportement classique à 3 rotors, et l'étend
+        naturellement pour 4..8 rotors
         """
-        Règle M3:
-        - Right avance à chaque frappe.
-        - Middle avance si Right est au notch OU si Middle est au notch.
-        - Left avance si Middle est au notch (double-stepping).
-        """
-        advance_left = self.middle.at_notch
-        advance_middle = self.right.at_notch or self.middle.at_notch
+        n = len(self.rotors)
+        will_step = [False] * n
 
-        # ordre de mouvement : Right, puis Middle (si), puis Left (si)
-        self.right.step()
-        if advance_middle:
-            self.middle.step()
-        if advance_left:
-            self.left.step()
+        # Le rotor le plus à droite avance toujours
+        will_step[-1] = True
 
-    # ---------------- Chiffrement d'une lettre ----------------
+        # Double-step
+        for i in range(n - 1, -1, -1):
+            if self.rotors[i].at_notch:
+                will_step[i] = True
+                if i > 0:
+                    will_step[i - 1] = True
+
+        for i, rotor in enumerate(self.rotors):
+            if will_step[i]:
+                rotor.step()
+
+    # ---------------- Chiffrement d'un index ----------------
     def _enc_idx(self, idx: int) -> int:
-        # Aller
-        idx = self.right.map_forward(idx)
-        idx = self.middle.map_forward(idx)
-        idx = self.left.map_forward(idx)
+        # Aller : du rotor le plus à droite vers le plus à gauche
+        for rotor in reversed(self.rotors):
+            idx = rotor.map_forward(idx)
 
         # Réflecteur
         ch = IDX_A[idx]
         ch_ref = self.reflector.allumer_lettre(ch)
         idx = A_IDX[ch_ref]
 
-        # Retour
-        idx = self.left.map_reverse(idx)
-        idx = self.middle.map_reverse(idx)
-        idx = self.right.map_reverse(idx)
+        # Retour : du rotor le plus à gauche vers le plus à droite
+        for rotor in self.rotors:
+            idx = rotor.map_reverse(idx)
 
         return idx
+
+
 
     def encrypt_char(self, ch: str) -> str:
         """Chiffre un caractère. Non-A–Z renvoyé tel quel (pratique pour garder espaces/ponctuation si souhaité)."""
@@ -114,7 +133,7 @@ class MachineEnigma:
         out = []
         for ch in clean:
             if ch == " ":
-                out.append(" ")  # n'affecte pas les rotors (choix pédagogique)
+                out.append(" ")  # n'affecte pas les rotors, pour m'aider à la lisibilité...
                 continue
             out.append(self.encrypt_char(ch))
 
