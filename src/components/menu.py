@@ -13,29 +13,49 @@ class Menu:
     # Fonctions pour demander les configurations MANUELLEMENT 
     # -------------------------------------------
     @staticmethod
-    def demander_rotors(n=3):
+    def demander_rotors():
         valid_rotors = ["I", "II", "III", "IV", "V", "VI", "VII", "VIII"]
 
-        choix = demander_rotors_gui(n=n, rotors_possibles=valid_rotors)
-        return choix 
+        # 1) Combien de rotors l'utilisateur veut-il ?
+        while True:
+            nb_str = input_dialog(
+                "Nombre de rotors",
+                "Combien de rotors souhaitez-vous utiliser ? (3 à 8)",
+                allow_back=True
+            )
+            if nb_str is None:
+                return None
+            try:
+                nb = int(nb_str.strip())
+            except ValueError:
+                show_error("Erreur", "Veuillez entrer un nombre entier entre 3 et 8.")
+                continue
+            if not (3 <= nb <= 8):
+                show_error("Erreur", "Le nombre de rotors doit être compris entre 3 et 8.")
+                continue
+            break
+
+        # 2) Choix des rotors eux-mêmes
+        choix = demander_rotors_gui(n=nb, rotors_possibles=valid_rotors)
+        return choix
+
 
     @staticmethod
     def demander_positions(n=3):
         while True:
             saisie = input_dialog(
                 "Positions des rotors",
-                f"Entrez les {n} positions initiales (ex: A B C ou ABC) :",
+                f"Entrez les {n} positions initiales (ex: A B C ...  ou ABC...) :",
                 allow_back=True
             )
             if saisie is None:
-                # Retour / annulation
                 return None
             
             positions = saisie.strip().upper().replace(" ", "")
             if len(positions) != n or any(c not in string.ascii_uppercase for c in positions):
                 show_error(
                     "Erreur positions",
-                    f"Vous devez entrer exactement {n} lettres A-Z (ex: A B C ou ABC)."
+                    f"Vous devez entrer exactement {n} lettres A-Z"
                 )
                 continue
 
@@ -185,8 +205,9 @@ class Menu:
         rotors = Menu.demander_rotors()
         if rotors is None:
             return None
-
-        positions = Menu.demander_positions()
+        
+        n= len(rotors)
+        positions = Menu.demander_positions(n=n)
         if positions is None:
             return None
 
