@@ -62,3 +62,42 @@ def demander_rotors_gui(n=3, rotors_possibles=None):
 
     # Si l'utilisateur a cliqué sur la croix sans valider → result == []
     return result if result else None
+
+def popup_menu(title, message, options, include_back=False):
+    """
+    Affiche une fenêtre avec plusieurs boutons. 
+    Retourne la clé de l'option choisie (ex: "1", "2").
+    Retourne "R" si le bouton Retour est cliqué.
+    """
+    win = tk.Toplevel(root)
+    win.title(title)
+    win.resizable(False, False)
+    win.grab_set()
+
+    lbl = tk.Label(win, text=message, justify="left")
+    lbl.pack(padx=20, pady=10)
+
+    result = {"choice": None}
+
+    def make_choice(k):
+        result["choice"] = k
+        win.destroy()
+
+    for key, text in options.items():
+        tk.Button(
+            win,
+            text=text,
+            width=25,
+            command=lambda k=key: make_choice(k)
+        ).pack(pady=5)
+
+    if include_back:
+        tk.Button(
+            win,
+            text="Retour",
+            width=25,
+            command=lambda: make_choice("R")
+        ).pack(pady=10)
+
+    root.wait_window(win)
+    return result["choice"]

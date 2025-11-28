@@ -3,7 +3,7 @@ import os
 import json
 from datetime import date
 
-from components.ui import demander_texte, show_info, show_error, demander_rotors_gui
+from components.ui import demander_texte, show_info, show_error, demander_rotors_gui, popup_menu
 from components.machineEnigma import MachineEnigma
 from configuration.configuration import load_codebook #recupère la fonction load_codebook
 
@@ -204,17 +204,20 @@ class Menu:
     #-------------------------------------------
     @staticmethod
     def afficher_menu():
-        texte = (
-            "****** Menu Enigma Simulator ******\n"
-            "1. Chiffrer un message\n"
-            "2. Déchiffrer un message\n"
-            "3. Quitter\n"
-            "Sélectionnez une option (1/2/3):"
+        choix = popup_menu(
+            "Menu principal",
+            "****** Menu Enigma Simulator ******",
+            {
+                "1": "Chiffrer un message",
+                "2": "Déchiffrer un message",
+                "3": "Quitter"
+            },
+            include_back=False 
         )
-        choix = demander_texte("Menu principal", texte)
         if choix is None:
-            return "3" 
-        return choix.strip()
+            return "3"
+        return choix
+
 
     @staticmethod
     def configurer_manuellement():
@@ -235,24 +238,19 @@ class Menu:
     @staticmethod
     def menu_chiffrement():
         while True:
-            # print("\n--- Chiffrement ---")
-            # print("1. Utiliser les configurations du jour (livre de code)")
-            # print("2. Entrer manuellement les rotors, positions et plugboard")
-            # print("R. Retour au menu principal")
-            # choix = Menu.choix_prompt("Votre choix (1/2/R):", {"1", "2"}, allow_back=True)
-
-            prompt = (
-                "--- Chiffrement ---\n"
-                "1. Utiliser les configurations du jour (livre de code)\n"
-                "2. Entrer manuellement les rotors, positions et plugboard"
+            choix = popup_menu(
+                "Chiffrement",
+                "--- Chiffrement ---",
+                {
+                    "1": "Utiliser les configurations du jour (livre de code)",
+                    "2": "Entrer manuellement les rotors, positions et plugboard"
+                },
+                include_back=True 
             )
-            choix = Menu.choix_prompt(prompt, {"1", "2"}, allow_back=True)
 
-
-            if choix == "R":
+            if choix == "R" or choix is None:
                 return None
             if choix == "1":
-                #print("Configuration du jour sélectionnée.")
                 entry = Menu.charger_config_livre_code()
                 return {
                     "mode": "livre_de_code",
@@ -269,20 +267,17 @@ class Menu:
     @staticmethod
     def menu_dechiffrement():
         while True:
-            # print("\n--- Déchiffrement ---")
-            # print("1. Utiliser les configurations du jour (livre de code)")
-            # print("2. Entrer manuellement les rotors, positions et plugboard")
-            # print("R. Retour")
-            # choix = Menu.choix_prompt("Votre choix (1/2) ?", {"1", "2"}, allow_back=True)
-
-            prompt = (
-                "--- Déchiffrement ---\n"
-                "1. Utiliser les configurations du jour (livre de code)\n"
-                "2. Entrer manuellement les rotors, positions et plugboard"
+            choix = popup_menu(
+                "Déchiffrement",
+                "--- Déchiffrement ---",
+                {
+                    "1": "Utiliser les configurations du jour (livre de code)",
+                    "2": "Entrer manuellement les rotors, positions et plugboard"
+                },
+                include_back=True
             )
-            choix = Menu.choix_prompt(prompt, {"1", "2"}, allow_back=True)
 
-            if choix == "R":
+            if choix == "R" or choix is None:
                 return None
             if choix == "1":
                 #print("Configuration du jour sélectionnée.")
