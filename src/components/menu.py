@@ -3,55 +3,18 @@ import os
 import json
 from datetime import date
 
-from components.ui import demander_texte, show_info, show_error, demander_rotors_gui
+from components.ui import show_info, show_error, demander_rotors_gui, popup_menu, input_dialog
 from components.machineEnigma import MachineEnigma
 from configuration.configuration import load_codebook #recupère la fonction load_codebook
 
 class Menu:
-
-    @staticmethod
-    def choix_prompt(prompt, valid_choices, allow_back=False, allow_quit=False):
-        """
-        Affiche un prompt texte + éventuellement:
-        - R: Retour
-        - Q: Quitter
-        et renvoie le choix validé.
-        """
-        extra = []
-        if allow_back:
-            extra.append("R: Retour")
-        if allow_quit:
-            extra.append("Q: Quitter")
-        if extra:
-            prompt += "\n" + " / ".join(extra)
-        else :
-            prompt += "\n"
-
-        while True:
-            #choix = input(f"{prompt}\n> ").strip().upper()
-
-            choix = demander_texte("Menu Enigma", prompt)
-            if choix is None:
-            # utilisateur a fermé la fenêtre → on peut décider de quitter
-                return "Q" if allow_quit else None
-
-            choix = choix.strip().upper()
-
-            if allow_back and choix == "R":
-                return "R"
-            if allow_quit and choix == "Q":
-                return "Q"
-            if choix in valid_choices:
-                return choix
-            #print("Choix invalide. Réessayez.")
-            show_error("Choix invalide", "Choix invalide. Réessayez.")
 
     # -------------------------------------------
     # Fonctions pour demander les configurations MANUELLEMENT 
     # -------------------------------------------
     @staticmethod
     def demander_rotors(n=3):
-        valid_rotors = ["I", "II", "III", "IV", "V"]
+        valid_rotors = ["I", "II", "III", "IV", "V", "VI", "VII", "VIII"]
 
         choix = demander_rotors_gui(n=n, rotors_possibles=valid_rotors)
         return choix 
@@ -59,12 +22,13 @@ class Menu:
     @staticmethod
     def demander_positions(n=3):
         while True:
-            #positions_input = input(f"Entrez les {n} positions initiales des rotors (ex: A B C): ").strip()
-            saisie = demander_texte(
+            saisie = input_dialog(
                 "Positions des rotors",
-                f"Entrez les {n} positions initiales (ex: A B C ou ABC):"
+                f"Entrez les {n} positions initiales (ex: A B C ou ABC) :",
+                allow_back=True
             )
             if saisie is None:
+                # Retour / annulation
                 return None
             
             positions = saisie.strip().upper().replace(" ", "")
@@ -74,43 +38,40 @@ class Menu:
                     f"Vous devez entrer exactement {n} lettres A-Z (ex: A B C ou ABC)."
                 )
                 continue
-            #la suite du code attend une liste, donc on met bien une liste:
+
             return list(positions)
+
 
 
     @staticmethod
     def demander_plugboard(max_paires=10, allow_back=True):
         alphabet = set(string.ascii_uppercase)
 
-        #Soit 1)Demander si on veut max paires ou non
+        # 1) Demander si on veut max_paires ou non
         while True:
-            saisie = demander_texte(
+            saisie = input_dialog(
                 "Plugboard",
                 f"Souhaitez-vous {max_paires} connexions de plugboard (complexité max) ?\n"
-                "Répondez O (oui), N (non) ou R (retour)."
+                "Répondez O (oui) ou N (non).",
+                allow_back=allow_back
             )
             if saisie is None:
                 return None
 
             choix = saisie.strip().lower()
-            if allow_back and choix == "r":
-                return None
             if choix in ("o", "oui"):
                 target_pairs = max_paires
                 break
             if choix in ("n", "non"):
-                nb = demander_texte(
+                nb = input_dialog(
                     "Plugboard",
-                    f"Combien de connexions souhaitez-vous ? (0 à {max_paires})\n"
-                    "Ou R pour retour."
+                    f"Combien de connexions souhaitez-vous ? (0 à {max_paires}) :",
+                    allow_back=allow_back
                 )
                 if nb is None:
                     return None
-                nb = nb.strip().lower()
-                if allow_back and nb == "r":
-                    return None
                 try:
-                    target_pairs = int(nb)
+                    target_pairs = int(nb.strip())
                     if 0 <= target_pairs <= max_paires:
                         break
                     else:
@@ -118,18 +79,19 @@ class Menu:
                 except ValueError:
                     show_error("Erreur plugboard", "Entrez un entier valide.")
             else:
-                show_error("Erreur plugboard", "Répondez par O, N ou R.")
+                show_error("Erreur plugboard", "Répondez par O (oui) ou N (non).")
 
         if target_pairs == 0:
             return []
 
-        #Soit 2)Demander les paires en une seule fois
+        # 2) Demander les paires en une seule fois
         while True:
-            saisie = demander_texte(
+            saisie = input_dialog(
                 "Plugboard",
                 f"Saisissez {target_pairs} paires sous forme AB CD EF ...\n"
                 "Sans chevauchement de lettres.\n"
-                "Exemple : AQ WS ED RF..."
+                "Exemple : AQ WS ED RF...",
+                allow_back=allow_back
             )
             if saisie is None:
                 return None
@@ -171,7 +133,6 @@ class Menu:
 
             if ok:
                 return pairs
-
     
     #-------------------------------------------
     # Fonction pour charger la config du jour depuis le livre de code AUTOMATIQUEMENT
@@ -204,17 +165,20 @@ class Menu:
     #-------------------------------------------
     @staticmethod
     def afficher_menu():
-        texte = (
-            "****** Menu Enigma Simulator ******\n"
-            "1. Chiffrer un message\n"
-            "2. Déchiffrer un message\n"
-            "3. Quitter\n"
-            "Sélectionnez une option (1/2/3):"
+        choix = popup_menu(
+            "Menu principal",
+            "Que souhaitez-vous faire sur la machine Enigma ?",
+            {
+                "1": "Chiffrer un message",
+                "2": "Déchiffrer un message",
+                "3": "Quitter"
+            },
+            include_back=False 
         )
-        choix = demander_texte("Menu principal", texte)
         if choix is None:
-            return "3" 
-        return choix.strip()
+            return "3"
+        return choix
+
 
     @staticmethod
     def configurer_manuellement():
@@ -235,24 +199,19 @@ class Menu:
     @staticmethod
     def menu_chiffrement():
         while True:
-            # print("\n--- Chiffrement ---")
-            # print("1. Utiliser les configurations du jour (livre de code)")
-            # print("2. Entrer manuellement les rotors, positions et plugboard")
-            # print("R. Retour au menu principal")
-            # choix = Menu.choix_prompt("Votre choix (1/2/R):", {"1", "2"}, allow_back=True)
-
-            prompt = (
-                "--- Chiffrement ---\n"
-                "1. Utiliser les configurations du jour (livre de code)\n"
-                "2. Entrer manuellement les rotors, positions et plugboard"
+            choix = popup_menu(
+                "Chiffrement",
+                "Avec quelle méthode souhaitez-vous chiffrer votre message ?",
+                {
+                    "1": "Utiliser les configurations du jour (livre de code)",
+                    "2": "Entrer manuellement les rotors, positions et plugboard"
+                },
+                include_back=True 
             )
-            choix = Menu.choix_prompt(prompt, {"1", "2"}, allow_back=True)
 
-
-            if choix == "R":
+            if choix == "R" or choix is None:
                 return None
             if choix == "1":
-                #print("Configuration du jour sélectionnée.")
                 entry = Menu.charger_config_livre_code()
                 return {
                     "mode": "livre_de_code",
@@ -269,20 +228,17 @@ class Menu:
     @staticmethod
     def menu_dechiffrement():
         while True:
-            # print("\n--- Déchiffrement ---")
-            # print("1. Utiliser les configurations du jour (livre de code)")
-            # print("2. Entrer manuellement les rotors, positions et plugboard")
-            # print("R. Retour")
-            # choix = Menu.choix_prompt("Votre choix (1/2) ?", {"1", "2"}, allow_back=True)
-
-            prompt = (
-                "--- Déchiffrement ---\n"
-                "1. Utiliser les configurations du jour (livre de code)\n"
-                "2. Entrer manuellement les rotors, positions et plugboard"
+            choix = popup_menu(
+                "Déchiffrement",
+                "Avec quelle méthode souhaitez-vous déchiffrer votre message ?",
+                {
+                    "1": "Utiliser les configurations du jour (livre de code)",
+                    "2": "Entrer manuellement les rotors, positions et plugboard"
+                },
+                include_back=True
             )
-            choix = Menu.choix_prompt(prompt, {"1", "2"}, allow_back=True)
 
-            if choix == "R":
+            if choix == "R" or choix is None:
                 return None
             if choix == "1":
                 #print("Configuration du jour sélectionnée.")
@@ -316,10 +272,11 @@ class Menu:
             reflector_preset="B",
         )
 
-        texte = demander_texte("Message", f"Entrez le message à {mode} :")
+        texte = input_dialog("Message", f"Entrez le message à {mode} :", allow_back=True)
         if texte is None or not texte.strip():
             show_error("Erreur", "Aucun texte saisi.")
             return
+
 
         # Enigma est symétrique : même fonction pour chiffrer et déchiffrer
         resultat = machine.encrypt(texte, keep_spaces=True, group_5=True)
