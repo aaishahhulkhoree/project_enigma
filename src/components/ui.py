@@ -4,18 +4,22 @@ from tkinter import messagebox, simpledialog, ttk
 root = tk.Tk()
 root.withdraw()  # Cacher la fenêtre principale
 
+def center_window(win):
+    win.update_idletasks()  # met à jour la taille réelle de la fenêtre
+    w = win.winfo_width()
+    h = win.winfo_height()
+    sw = win.winfo_screenwidth()
+    sh = win.winfo_screenheight()
+
+    x = int((sw - w) / 2)
+    y = int((sh - h) / 2)
+
+    win.geometry(f"{w}x{h}+{x}+{y}")
+
+
 def demander_texte(title: str, prompt: str) -> str | None:
     """Demande une chaîne à l'utilisateur via une pop-up."""
     return simpledialog.askstring(title, prompt, parent=root)
-
-
-# def demander_choix(title: str, prompt: str, choices: list[str]) -> str | None:
-#     """
-#     Demande un choix parmi une liste (1,2,3...). 
-#     Retourne la chaîne choisie ou None si annulé.
-#     """
-#     texte = prompt + "\n\n" + "\n".join(choices)
-#     return simpledialog.askstring(title, texte, parent=root)
 
 def show_info(title: str, message: str):
     messagebox.showinfo(title, message, parent=root)
@@ -74,8 +78,33 @@ def popup_menu(title, message, options, include_back=False):
     win.resizable(False, False)
     win.grab_set()
 
-    lbl = tk.Label(win, text=message, justify="left")
-    lbl.pack(padx=20, pady=10)
+    win.minsize(450, 200)
+
+    win.update_idletasks()
+    center_window(win)
+
+    style = ttk.Style(win)
+    try: 
+        style.theme_use("clam")
+    except tk.TclError:
+        pass
+
+    style.configure(
+        "Menu.TButton",
+        padding=6,
+        font=("Segoe UI", 10)
+    )
+    style.configure(
+        "Return.TButton",
+        padding=6,
+        font=("Segoe UI", 10, "bold")
+    )
+
+    lbl = tk.Label(win, text=message, justify="center", wraplength=400)
+    lbl.pack(padx=20, pady=(20, 10))
+
+    frame = tk.Frame(win)
+    frame.pack(fill="both", expand=True, padx=20, pady=(0, 10))
 
     result = {"choice": None}
 
@@ -84,20 +113,12 @@ def popup_menu(title, message, options, include_back=False):
         win.destroy()
 
     for key, text in options.items():
-        tk.Button(
-            win,
-            text=text,
-            width=25,
-            command=lambda k=key: make_choice(k)
-        ).pack(pady=5)
+        btn = ttk.Button(frame, text=text, style="Menu.TButton", command=lambda k=key: make_choice(k))
+        btn.pack(fill="x", pady=5)
 
     if include_back:
-        tk.Button(
-            win,
-            text="Retour",
-            width=25,
-            command=lambda: make_choice("R")
-        ).pack(pady=10)
+        btn_back = ttk.Button(win, text="Retour", style="Return.TButton", command=lambda: make_choice("R"))
+        btn_back.pack(pady=(0, 15))
 
     root.wait_window(win)
     return result["choice"]

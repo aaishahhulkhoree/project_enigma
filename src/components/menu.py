@@ -206,7 +206,7 @@ class Menu:
     def afficher_menu():
         choix = popup_menu(
             "Menu principal",
-            "****** Menu Enigma Simulator ******",
+            "Que souhaitez-vous faire sur la machine Enigma ?",
             {
                 "1": "Chiffrer un message",
                 "2": "Déchiffrer un message",
@@ -240,7 +240,7 @@ class Menu:
         while True:
             choix = popup_menu(
                 "Chiffrement",
-                "--- Chiffrement ---",
+                "Avec quelle méthode souhaitez-vous chiffrer votre message ?",
                 {
                     "1": "Utiliser les configurations du jour (livre de code)",
                     "2": "Entrer manuellement les rotors, positions et plugboard"
@@ -269,7 +269,7 @@ class Menu:
         while True:
             choix = popup_menu(
                 "Déchiffrement",
-                "--- Déchiffrement ---",
+                "Avec quelle méthode souhaitez-vous déchiffrer votre message ?",
                 {
                     "1": "Utiliser les configurations du jour (livre de code)",
                     "2": "Entrer manuellement les rotors, positions et plugboard"
