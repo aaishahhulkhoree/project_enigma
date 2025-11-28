@@ -63,7 +63,7 @@ class Rotor:
 
 
 def create_rotor(name: str, position: str = "A", ring_setting: int = 0) -> Rotor:
-    """Crée un rotor depuis son nom ('I'..'V'), position lettre (ex: 'D') et ring_setting (0..25)."""
+    """Crée un rotor depuis son nom ('I'..'VIII'), position lettre (ex: 'D') et ring_setting (0..25)."""
     name = name.upper()
     if name not in ROTORS:
         assertionError(f"Rotor inconnu: {name!r}. Choisir parmi: {', '.join(ROTORS)}")

@@ -13,6 +13,9 @@ ROTORS: Dict[str, Tuple[str, str]] = {
     "III": ("BDFHJLCPRTXVZNYEIWGAKMUSQO", "V"),
     "IV":  ("ESOVPZJAYQUIRHXLNFTGKDCMWB", "J"),
     "V":   ("VZBRGITYUPSDNHLXAWMJQOFECK", "Z"),
+    "VI":  ("JPGVOUMFYQBENHZRDKASXLICTW", "Z"),
+    "VII": ("NZJHGRCXMYSWBOUFAIVLPEKQDT", "Z"),
+    "VIII":("FKQHTLXOCBJSPDZRAMEWNIUYGV", "M")
 }
 
 # Définitions des réflecteurs UKW-B et UKW-C

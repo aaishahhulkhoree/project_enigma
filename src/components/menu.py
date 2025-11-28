@@ -8,13 +8,13 @@ from components.machineEnigma import MachineEnigma
 from configuration.configuration import load_codebook #recupère la fonction load_codebook
 
 class Menu:
-    
+
     # -------------------------------------------
     # Fonctions pour demander les configurations MANUELLEMENT 
     # -------------------------------------------
     @staticmethod
     def demander_rotors(n=3):
-        valid_rotors = ["I", "II", "III", "IV", "V"]
+        valid_rotors = ["I", "II", "III", "IV", "V", "VI", "VII", "VIII"]
 
         choix = demander_rotors_gui(n=n, rotors_possibles=valid_rotors)
         return choix 
