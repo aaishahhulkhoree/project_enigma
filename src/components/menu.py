@@ -3,7 +3,7 @@ import os
 import json
 from datetime import date
 
-from components.ui import demander_choix, demander_texte
+from components.ui import demander_texte, show_info, show_error, demander_rotors_gui
 from components.machineEnigma import MachineEnigma
 from configuration.configuration import load_codebook #recupère la fonction load_codebook
 
@@ -43,107 +43,140 @@ class Menu:
                 return "Q"
             if choix in valid_choices:
                 return choix
-            print("Choix invalide. Réessayez.")
+            #print("Choix invalide. Réessayez.")
+            show_error("Choix invalide", "Choix invalide. Réessayez.")
 
     # -------------------------------------------
     # Fonctions pour demander les configurations MANUELLEMENT 
     # -------------------------------------------
     @staticmethod
     def demander_rotors(n=3):
-        while True:
-            rotors_input = input(f"Entrez les {n} rotors (ex: I II III): ").strip()
-            rotors = rotors_input.split()
-            if len(rotors) != n:
-                print(f"Veuillez entrer exactement {n} rotors. Recommencez.")
-                continue
-            valid_rotors = {"I", "II", "III", "IV", "V", "VI", "VII", "VIII"}
-            if all(rotor in valid_rotors for rotor in rotors):
-                break
-            else:
-                print("Rotors invalides. Choisissez parmi I, II, III, IV, V, VI, VII, VIII.")
-        return rotors
+        valid_rotors = ["I", "II", "III", "IV", "V"]
+
+        choix = demander_rotors_gui(n=n, rotors_possibles=valid_rotors)
+        return choix 
 
     @staticmethod
     def demander_positions(n=3):
         while True:
-            positions_input = input(f"Entrez les {n} positions initiales des rotors (ex: A B C): ").strip()
-            positions = positions_input.split()
-            if len(positions) != n:
-                print(f"Veuillez entrer exactement {n} positions. Recommencez.")
+            #positions_input = input(f"Entrez les {n} positions initiales des rotors (ex: A B C): ").strip()
+            saisie = demander_texte(
+                "Positions des rotors",
+                f"Entrez les {n} positions initiales (ex: A B C ou ABC):"
+            )
+            if saisie is None:
+                return None
+            
+            positions = saisie.strip().upper().replace(" ", "")
+            if len(positions) != n or any(c not in string.ascii_uppercase for c in positions):
+                show_error(
+                    "Erreur positions",
+                    f"Vous devez entrer exactement {n} lettres A-Z (ex: A B C ou ABC)."
+                )
                 continue
-            if all(pos in string.ascii_uppercase for pos in positions):
-                break
-            else:
-                print("Positions invalides. Utilisez des lettres majuscules A-Z.")
-        return positions
+            #la suite du code attend une liste, donc on met bien une liste:
+            return list(positions)
 
 
     @staticmethod
     def demander_plugboard(max_paires=10, allow_back=True):
         alphabet = set(string.ascii_uppercase)
+
+        #Soit 1)Demander si on veut max paires ou non
         while True:
-            choix = input(f"Souhaitez-vous {max_paires} connexions de plugboard pour complexité max ? (o/n): — ou R pour retour:\n").strip().lower()
+            saisie = demander_texte(
+                "Plugboard",
+                f"Souhaitez-vous {max_paires} connexions de plugboard (complexité max) ?\n"
+                "Répondez O (oui), N (non) ou R (retour)."
+            )
+            if saisie is None:
+                return None
+
+            choix = saisie.strip().lower()
             if allow_back and choix == "r":
                 return None
             if choix in ("o", "oui"):
                 target_pairs = max_paires
                 break
             if choix in ("n", "non"):
+                nb = demander_texte(
+                    "Plugboard",
+                    f"Combien de connexions souhaitez-vous ? (0 à {max_paires})\n"
+                    "Ou R pour retour."
+                )
+                if nb is None:
+                    return None
+                nb = nb.strip().lower()
+                if allow_back and nb == "r":
+                    return None
                 try:
-                    nb = input("Combien de connexions souhaitez-vous ? (0 à 10): — ou R pour retour:\n").strip()
-                    if allow_back and nb == 'r':
-                        return None
                     target_pairs = int(nb)
                     if 0 <= target_pairs <= max_paires:
                         break
-                    print("Entrez un entier entre 0 et 10.")
+                    else:
+                        show_error("Erreur plugboard", f"Entrez un entier entre 0 et {max_paires}.")
                 except ValueError:
-                    print("Entrez un entier valide.")
+                    show_error("Erreur plugboard", "Entrez un entier valide.")
             else:
-                print("Répondez par 'o' ou 'n'.")
+                show_error("Erreur plugboard", "Répondez par O, N ou R.")
 
         if target_pairs == 0:
             return []
 
-        print(f"\nSaisissez {target_pairs} paires sous forme AB (ex: AQ), sans chevauchement de lettres.")
-        print("Astuce: vous pouvez aussi les entrer en une seule ligne séparées par des espaces (ex: AB CD EF...).")
-        print("Tapez R pour revenir en arrière.")
-
-        used_letters = set()
-        pairs = []
-
-        while len(pairs) < target_pairs:
-            rest = target_pairs - len(pairs)
-            ligne = input(f"Entrez {rest} paire(s): ").strip().upper()
-
-            if allow_back and ligne == "R":
+        #Soit 2)Demander les paires en une seule fois
+        while True:
+            saisie = demander_texte(
+                "Plugboard",
+                f"Saisissez {target_pairs} paires sous forme AB CD EF ...\n"
+                "Sans chevauchement de lettres.\n"
+                "Exemple : AQ WS ED RF..."
+            )
+            if saisie is None:
                 return None
-            
-            candidats = ligne.split()
-            for token in candidats:
-                if len(pairs) >= target_pairs:
-                    break
+
+            tokens = saisie.strip().upper().split()
+            if len(tokens) != target_pairs:
+                show_error(
+                    "Erreur plugboard",
+                    f"Vous devez entrer exactement {target_pairs} paires séparées par des espaces."
+                )
+                continue
+
+            used_letters = set()
+            pairs = []
+            ok = True
+            for token in tokens:
                 if len(token) != 2:
-                    print(f"'{token}' n'est pas une paire de 2 lettres.")
-                    continue
+                    show_error("Erreur plugboard", f"'{token}' n'est pas une paire de 2 lettres.")
+                    ok = False
+                    break
                 a, b = token[0], token[1]
                 if a not in alphabet or b not in alphabet:
-                    print(f"'{token}' contient des caractères non A-Z.")
-                    continue
+                    show_error("Erreur plugboard", f"'{token}' contient des caractères non A-Z.")
+                    ok = False
+                    break
                 if a == b:
-                    print(f"'{token}' doit relier deux lettres différentes.")
-                    continue
+                    show_error("Erreur plugboard", f"'{token}' doit relier deux lettres différentes.")
+                    ok = False
+                    break
                 if a in used_letters or b in used_letters:
-                    print(f"'{token}' chevauche une lettre déjà utilisée ({a} ou {b}).")
-                    continue
+                    show_error(
+                        "Erreur plugboard",
+                        f"'{token}' chevauche une lettre déjà utilisée ({a} ou {b})."
+                    )
+                    ok = False
+                    break
                 used_letters.update([a, b])
                 pairs.append(token)
-        return pairs
+
+            if ok:
+                return pairs
+
     
     #-------------------------------------------
     # Fonction pour charger la config du jour depuis le livre de code AUTOMATIQUEMENT
     #-------------------------------------------
-    
+    @staticmethod
     def charger_config_livre_code():
         """Charge la config du jour depuis data/livre_code.json."""
 
@@ -160,7 +193,8 @@ class Menu:
         else:
             date_str = sorted(data.keys())[-1]
 
-        print(f"Configuration du livre de code pour la date : {date_str}")
+        #print(f"Configuration du livre de code pour la date : {date_str}")
+        show_info("Livre de code", f"Configuration du livre de code pour la date : {date_str}")
         return load_codebook(codebook_path, date_str)
 
 
@@ -168,15 +202,20 @@ class Menu:
     #-------------------------------------------
     # Menu principal et navigation
     #-------------------------------------------
-    @staticmethod   
+    @staticmethod
     def afficher_menu():
-        print("****** Menu Enigma Simulator ******")
-        print("Veuillez choisir une option :")
-        print("1. Chiffrer un message")
-        print("2. Déchiffrer un message")
-        print("3. Quitter")
-        return Menu.choix_prompt("Sélectionnez une option (1/2/3):", {"1", "2", "3"})
-    
+        texte = (
+            "****** Menu Enigma Simulator ******\n"
+            "1. Chiffrer un message\n"
+            "2. Déchiffrer un message\n"
+            "3. Quitter\n"
+            "Sélectionnez une option (1/2/3):"
+        )
+        choix = demander_texte("Menu principal", texte)
+        if choix is None:
+            return "3" 
+        return choix.strip()
+
     @staticmethod
     def configurer_manuellement():
         rotors = Menu.demander_rotors()
@@ -192,13 +231,23 @@ class Menu:
             return None
         return {"mode": "manuel", "rotors": rotors, "positions": positions, "plugboard": plugboard}
 
+
+    @staticmethod
     def menu_chiffrement():
         while True:
-            print("\n--- Chiffrement ---")
-            print("1. Utiliser les configurations du jour (livre de code)")
-            print("2. Entrer manuellement les rotors, positions et plugboard")
-            print("R. Retour au menu principal")
-            choix = Menu.choix_prompt("Votre choix (1/2/R):", {"1", "2"}, allow_back=True)
+            # print("\n--- Chiffrement ---")
+            # print("1. Utiliser les configurations du jour (livre de code)")
+            # print("2. Entrer manuellement les rotors, positions et plugboard")
+            # print("R. Retour au menu principal")
+            # choix = Menu.choix_prompt("Votre choix (1/2/R):", {"1", "2"}, allow_back=True)
+
+            prompt = (
+                "--- Chiffrement ---\n"
+                "1. Utiliser les configurations du jour (livre de code)\n"
+                "2. Entrer manuellement les rotors, positions et plugboard"
+            )
+            choix = Menu.choix_prompt(prompt, {"1", "2"}, allow_back=True)
+
 
             if choix == "R":
                 return None
@@ -220,11 +269,18 @@ class Menu:
     @staticmethod
     def menu_dechiffrement():
         while True:
-            print("\n--- Déchiffrement ---")
-            print("1. Utiliser les configurations du jour (livre de code)")
-            print("2. Entrer manuellement les rotors, positions et plugboard")
-            print("R. Retour")
-            choix = Menu.choix_prompt("Votre choix (1/2) ?", {"1", "2"}, allow_back=True)
+            # print("\n--- Déchiffrement ---")
+            # print("1. Utiliser les configurations du jour (livre de code)")
+            # print("2. Entrer manuellement les rotors, positions et plugboard")
+            # print("R. Retour")
+            # choix = Menu.choix_prompt("Votre choix (1/2) ?", {"1", "2"}, allow_back=True)
+
+            prompt = (
+                "--- Déchiffrement ---\n"
+                "1. Utiliser les configurations du jour (livre de code)\n"
+                "2. Entrer manuellement les rotors, positions et plugboard"
+            )
+            choix = Menu.choix_prompt(prompt, {"1", "2"}, allow_back=True)
 
             if choix == "R":
                 return None
@@ -260,20 +316,21 @@ class Menu:
             reflector_preset="B",
         )
 
-        texte = input(f"Entrez le message à {mode} : ").strip()
-        if not texte:
-            print("Aucun texte saisi.")
+        texte = demander_texte("Message", f"Entrez le message à {mode} :")
+        if texte is None or not texte.strip():
+            show_error("Erreur", "Aucun texte saisi.")
             return
 
         # Enigma est symétrique : même fonction pour chiffrer et déchiffrer
         resultat = machine.encrypt(texte, keep_spaces=True, group_5=True)
-        print(f"\nTexte {mode} : {resultat}\n")
+        #print(f"\nTexte {mode} : {resultat}\n")
+        show_info("Résultat", f"Texte {mode} :\n\n{resultat}")
 
     
     @staticmethod
     def quitter():
-        print("Merci d'avoir utilisé le simulateur Enigma. Au revoir!")
-        print("Fermeture du programme.")
+        # print("Merci d'avoir utilisé le simulateur Enigma. Au revoir!")
+        # print("Fermeture du programme.")
         exit(0)
 
     @staticmethod
@@ -285,21 +342,22 @@ class Menu:
                 config = Menu.menu_chiffrement()
                 if config is None:
                     continue
-                print("Configuration sélectionnée:", config)
+                # print("Configuration sélectionnée:", config)
                 Menu.lancer_machine(config, mode="chiffrer") 
                     
             elif choix == "2":
                 config = Menu.menu_dechiffrement()
                 if config is None:
                     continue
-                print("Configuration sélectionnée:", config)
+                # print("Configuration sélectionnée:", config)
                 Menu.lancer_machine(config, mode="déchiffrer")
 
             elif choix == "3":
                 Menu.quitter()
             
             else:
-                print("Choix invalide. Réessayez.")
+                # print("Choix invalide. Réessayez.")
+                show_error("Choix invalide", "Choix invalide. Réessayez.")
 
 
 if __name__ == "__main__":
