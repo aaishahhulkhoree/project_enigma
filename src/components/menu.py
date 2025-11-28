@@ -3,7 +3,7 @@ import os
 import json
 from datetime import date
 
-from components.ui import show_info, show_error, demander_rotors_gui, popup_menu, input_dialog
+from components.ui import show_info, show_error, demander_rotors_gui, demander_positions_gui, popup_menu, input_dialog
 from components.machineEnigma import MachineEnigma
 from configuration.configuration import load_codebook #recupère la fonction load_codebook
 
@@ -42,24 +42,36 @@ class Menu:
 
     @staticmethod
     def demander_positions(n=3):
+        """
+        Demande les positions initiales des rotors via une boucle while True,
+        mais en utilisant une fenêtre graphique (demander_positions_gui).
+        """
         while True:
-            saisie = input_dialog(
-                "Positions des rotors",
-                f"Entrez les {n} positions initiales (ex: A B C ...  ou ABC...) :",
-                allow_back=True
-            )
-            if saisie is None:
+
+            # Ouvre la fenêtre avec menus déroulants
+            positions = demander_positions_gui(n=n)
+
+            # Si l'utilisateur ferme la fenêtre → on annule
+            if positions is None:
                 return None
-            
-            positions = saisie.strip().upper().replace(" ", "")
-            if len(positions) != n or any(c not in string.ascii_uppercase for c in positions):
+
+            # Vérification (normalement inutile car la GUI empêche d'autres valeurs)
+            valid = True
+            for p in positions:
+                if not isinstance(p, str) or len(p) != 1 or p not in string.ascii_uppercase:
+                    valid = False
+                    break
+
+            if not valid:
                 show_error(
                     "Erreur positions",
-                    f"Vous devez entrer exactement {n} lettres A-Z"
+                    f"Les positions doivent être {n} lettres majuscules entre A et Z."
                 )
-                continue
+                continue  # On relance la demande
 
-            return list(positions)
+            # OK → on renvoie
+            return positions
+
 
 
 
@@ -157,10 +169,61 @@ class Menu:
     #-------------------------------------------
     # Fonction pour charger la config du jour depuis le livre de code AUTOMATIQUEMENT
     #-------------------------------------------
-    @staticmethod
-    def charger_config_livre_code():
-        """Charge la config du jour depuis data/livre_code.json."""
+    # @staticmethod
+    # def charger_config_livre_code():
+    #     """Charge la config du jour depuis data/livre_code.json."""
 
+    #     # on remonte de components/ vers src/, puis on va dans data/
+    #     base_dir = os.path.dirname(os.path.dirname(__file__))
+    #     codebook_path = os.path.join(base_dir, "data", "livre_code.json")
+
+    #     with open(codebook_path, "r", encoding="utf-8") as f:
+    #         data = json.load(f)
+
+    #     today = date.today().isoformat()
+    #     if today in data:
+    #         date_str = today
+    #     else:
+    #         date_str = sorted(data.keys())[-1]
+
+    #     #print(f"Configuration du livre de code pour la date : {date_str}")
+    #     show_info("Livre de code", f"Configuration du livre de code pour la date : {date_str}")
+    #     return load_codebook(codebook_path, date_str)
+
+    # -------------------------------------------
+    # Fonctions spécifiques au LIVRE DE CODE
+    # -------------------------------------------
+    @staticmethod
+    def demander_nb_rotors_livre():
+        """
+        Demande combien de rotors utiliser AVEC le livre de code (3 à 8).
+        On ne choisit pas les noms ici, ils viennent du livre.
+        """
+        while True:
+            nb_str = input_dialog(
+                "Nombre de rotors",
+                "Combien de rotors souhaitez-vous utiliser avec le livre de code ? (3 à 8)",
+                allow_back=True
+            )
+            if nb_str is None:
+                return None
+            try:
+                nb = int(nb_str.strip())
+            except ValueError:
+                show_error("Erreur", "Veuillez entrer un nombre entier entre 3 et 8.")
+                continue
+            if not (3 <= nb <= 8):
+                show_error("Erreur", "Le nombre de rotors doit être compris entre 3 et 8.")
+                continue
+            return nb
+
+    @staticmethod
+    def charger_config_livre_code(nb_rotors: int | None = None):
+        """
+        Charge la config du jour depuis data/livre_code.json.
+        Si nb_rotors est fourni, on tronque la liste des rotors/positions
+        aux nb_rotors premiers (si le livre en définit assez).
+        """
         # on remonte de components/ vers src/, puis on va dans data/
         base_dir = os.path.dirname(os.path.dirname(__file__))
         codebook_path = os.path.join(base_dir, "data", "livre_code.json")
@@ -174,10 +237,37 @@ class Menu:
         else:
             date_str = sorted(data.keys())[-1]
 
-        #print(f"Configuration du livre de code pour la date : {date_str}")
-        show_info("Livre de code", f"Configuration du livre de code pour la date : {date_str}")
-        return load_codebook(codebook_path, date_str)
+        entry = load_codebook(codebook_path, date_str)
 
+        rotors = entry["rotors"]
+        positions = entry["positions"]
+        plugboard = entry["plugboard"]
+
+        # Si l'utilisateur demande un nombre précis de rotors
+        if nb_rotors is not None:
+            if len(rotors) < nb_rotors or len(positions) < nb_rotors:
+                show_error(
+                    "Livre de code",
+                    f"Le livre de code pour la date {date_str} ne définit que {len(rotors)} rotors, "
+                    f"vous en avez demandé {nb_rotors}."
+                )
+                return None
+            rotors = rotors[:nb_rotors]
+            positions = positions[:nb_rotors]
+        else:
+            nb_rotors = len(rotors)
+
+        show_info(
+            "Livre de code",
+            f"Configuration du livre de code pour la date : {date_str}\n"
+            f"Nombre de rotors utilisés : {nb_rotors}"
+        )
+
+        return {
+            "rotors": rotors,
+            "positions": positions,
+            "plugboard": plugboard,
+        }
 
 
     #-------------------------------------------
@@ -233,7 +323,18 @@ class Menu:
             if choix == "R" or choix is None:
                 return None
             if choix == "1":
-                entry = Menu.charger_config_livre_code()
+                #entry = Menu.charger_config_livre_code()
+                # 1) Demander d'abord le nombre de rotors
+                nb = Menu.demander_nb_rotors_livre()
+                if nb is None:
+                    continue
+
+                # 2) Charger la config du livre de code en coupant à nb rotors
+                entry = Menu.charger_config_livre_code(nb_rotors=nb)
+                if entry is None:
+                    # erreur (ex: le livre n'a que 3 rotors) -> on revient au menu
+                    continue
+
                 return {
                     "mode": "livre_de_code",
                     "rotors": entry["rotors"],
@@ -263,7 +364,19 @@ class Menu:
                 return None
             if choix == "1":
                 #print("Configuration du jour sélectionnée.")
-                entry = Menu.charger_config_livre_code()
+                #entry = Menu.charger_config_livre_code()
+                
+                # 1) Demander le nombre de rotors
+                nb = Menu.demander_nb_rotors_livre()
+                if nb is None:
+                    continue
+
+                # 2) Charger la config du livre de code coupée à nb rotors
+                entry = Menu.charger_config_livre_code(nb_rotors=nb)
+                if entry is None:
+                    continue
+
+
                 return {
                     "mode": "livre_de_code",
                     "rotors": entry["rotors"],
