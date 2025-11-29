@@ -1,6 +1,7 @@
 import string 
 import os 
 import json
+import math
 from datetime import date
 
 from components.ui import show_info, show_error, demander_rotors_gui, demander_positions_gui, popup_menu, input_dialog
@@ -51,7 +52,7 @@ class Menu:
             # Ouvre la fenêtre avec menus déroulants
             positions = demander_positions_gui(n=n)
 
-            # Si l'utilisateur ferme la fenêtre → on annule
+            # Si l'utilisateur ferme la fenêtre --> on annule
             if positions is None:
                 return None
 
@@ -165,30 +166,7 @@ class Menu:
 
             if ok:
                 return pairs
-    
-    #-------------------------------------------
-    # Fonction pour charger la config du jour depuis le livre de code AUTOMATIQUEMENT
-    #-------------------------------------------
-    # @staticmethod
-    # def charger_config_livre_code():
-    #     """Charge la config du jour depuis data/livre_code.json."""
 
-    #     # on remonte de components/ vers src/, puis on va dans data/
-    #     base_dir = os.path.dirname(os.path.dirname(__file__))
-    #     codebook_path = os.path.join(base_dir, "data", "livre_code.json")
-
-    #     with open(codebook_path, "r", encoding="utf-8") as f:
-    #         data = json.load(f)
-
-    #     today = date.today().isoformat()
-    #     if today in data:
-    #         date_str = today
-    #     else:
-    #         date_str = sorted(data.keys())[-1]
-
-    #     #print(f"Configuration du livre de code pour la date : {date_str}")
-    #     show_info("Livre de code", f"Configuration du livre de code pour la date : {date_str}")
-    #     return load_codebook(codebook_path, date_str)
 
     # -------------------------------------------
     # Fonctions spécifiques au LIVRE DE CODE

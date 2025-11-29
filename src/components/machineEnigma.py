@@ -32,9 +32,6 @@ class MachineEnigma:
         if len(positions) != n:
             raise ValueError("positions doit être une chaîne de 3 lettres (LEFT,MIDDLE,RIGHT).")
 
-        #self.left_name, self.mid_name, self.right_name = [x.upper() for x in rotors_names]
-        #L_pos, M_pos, R_pos = positions.upper()
-
         if ring_settings is None:
             ring_settings = [0] * n  # par défaut, tous à 0
         if len(ring_settings) != n:
@@ -43,11 +40,6 @@ class MachineEnigma:
         # Composants
         self.plugboard = Plugboard(plug_pairs or [])
         self.reflector = Reflecteur(preset=reflector_preset)
-
-        # Rotors (instanciés gauche-->milieu-->droite) POUR 3 ROTORS
-        #self.left: Rotor = create_rotor(self.left_name, position=L_pos, ring_setting=ring_settings[0])
-        #self.middle: Rotor = create_rotor(self.mid_name, position=M_pos, ring_setting=ring_settings[1])
-        #self.right: Rotor = create_rotor(self.right_name, position=R_pos, ring_setting=ring_settings[2])
 
         # Rotors : liste de gauche -> droite
         self.rotor_names = [name.upper() for name in rotors_names]
