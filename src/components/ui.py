@@ -319,3 +319,74 @@ def input_dialog(title, message, initial_value: str = "", allow_back: bool = Fal
 
     root.wait_window(win)
     return result["text"]
+
+
+def afficher_resultat_avec_complexite(mode: str, texte_resultat: str, texte_complexite: str):
+    """
+    Affiche une fenêtre avec le texte chiffré/déchiffré
+    et un bouton pour voir l'évaluation de la complexité.
+    """
+    win = tk.Toplevel(root)
+    win.title("Résultat")
+    win.resizable(False, False)
+    win.grab_set()
+
+    win.minsize(600, 300)
+    win.update_idletasks()
+    center_window(win)
+
+    style = ttk.Style(win)
+    try:
+        style.theme_use("clam")
+    except tk.TclError:
+        pass
+
+    style.configure("Menu.TButton", padding=6, font=("Segoe UI", 10))
+    style.configure("Return.TButton", padding=6, font=("Segoe UI", 10, "bold"))
+
+    frame = ttk.Frame(win, padding=20)
+    frame.pack(fill="both", expand=True)
+
+    # Titre
+    lbl = ttk.Label(
+        frame,
+        text=f"Texte {mode} :",
+        justify="left",
+        font=("Segoe UI", 11, "bold")
+    )
+    lbl.pack(anchor="w", pady=(0, 5))
+
+    # Zone de texte en lecture seule
+    txt = tk.Text(frame, height=8, wrap="word")
+    txt.insert("1.0", texte_resultat)
+    txt.config(state="disabled")
+    txt.pack(fill="both", expand=True, pady=(0, 15))
+
+    btn_frame = ttk.Frame(frame)
+    btn_frame.pack(pady=(0, 5))
+
+    def voir_complexite():
+        messagebox.showinfo(
+            "Évaluation de la complexité",
+            texte_complexite,
+            parent=win
+        )
+
+    btn_complex = ttk.Button(
+        btn_frame,
+        text="Voir l'évaluation de la complexité",
+        style="Menu.TButton",
+        command=voir_complexite
+    )
+    btn_complex.grid(row=0, column=0, padx=5)
+
+    btn_close = ttk.Button(
+        btn_frame,
+        text="Fermer",
+        style="Return.TButton",
+        command=win.destroy
+    )
+    btn_close.grid(row=0, column=1, padx=5)
+
+    root.wait_window(win)
+

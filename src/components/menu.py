@@ -1,12 +1,65 @@
-import math  # si tu en as encore besoin
+import math 
 
-from components.ui import show_error, popup_menu, input_dialog
+from components.ui import show_info, show_error, popup_menu, input_dialog, afficher_resultat_avec_complexite
 from components.machineEnigma import MachineEnigma
-
 from components.configEnigma import (demander_rotors,demander_positions,demander_plugboard,demander_nb_rotors_livre,charger_config_livre_code)
 
 
 class Menu:
+
+    @staticmethod
+    def evaluer_complexite(config) -> str:
+        """
+        Calcule une estimation de la complexité de la configuration Enigma
+        (nombre de clés possibles) en fonction :
+        - de l'ordre des rotors,
+        - des positions initiales,
+        - du plugboard.
+        Retourne un texte explicatif.
+        """
+        n_rotors = len(config["rotors"])
+        nb_paires = len(config["plugboard"])
+
+        # 1) permutations d'ordre des rotors parmi 8 disponibles
+        total_rotors_disponibles = 8
+        perm_rotors = 1
+        for i in range(total_rotors_disponibles, total_rotors_disponibles - n_rotors, -1):
+            perm_rotors *= i
+
+        # 2) positions initiales possibles : 26^n
+        positions_factor = 26 ** n_rotors
+
+        # 3) combinaisons de plugboard (formule classique Enigma)
+        p = nb_paires
+        if p == 0:
+            plugboard_configs = 1
+        else:
+            plugboard_configs = math.factorial(26) // (
+                (2 ** p) * math.factorial(p) * math.factorial(26 - 2 * p)
+            )
+
+        espace_cles = perm_rotors * positions_factor * plugboard_configs
+
+        # Logs pour avoir des exposants lisibles
+        log10_k = math.log10(espace_cles)
+        log2_k = math.log2(espace_cles)
+
+        if log2_k < 40:
+            niveau = "faible"
+        elif log2_k < 80:
+            niveau = "moyenne"
+        else:
+            niveau = "élevée"
+
+        texte = (
+            f"Nombre de rotors utilisés : {n_rotors}\n"
+            f"Nombre de paires de plugboard : {nb_paires}\n\n"
+            "Espace de clés approximatif (nombre de configurations possibles) :\n"
+            f"- ≈ 10^{log10_k:.1f} configurations différentes\n"
+            f"- soit ≈ 2^{log2_k:.1f} possibilités\n\n"
+            f"Niveau global de complexité : {niveau.upper()}."
+        )
+        return texte
 
     #-------------------------------------------
     # Menu principal et navigation
@@ -159,22 +212,23 @@ class Menu:
         positions = "".join(config["positions"])
         plugboard = config["plugboard"]
 
-        machine = MachineEnigma(
-            rotors_names=rotors,
-            positions=positions,
-            plug_pairs=plugboard,
-            reflector_preset="B",
-        )
+        machine = MachineEnigma(rotors_names=rotors,positions=positions,plug_pairs=plugboard,reflector_preset="B")
 
         texte = input_dialog("Message", f"Entrez le message à {mode} :", allow_back=True)
         if texte is None or not texte.strip():
             show_error("Erreur", "Aucun texte saisi.")
             return
 
-        resultat = machine.encrypt(texte, keep_spaces=True, group_5=True)
+        # Enigma est symétrique : même fonction pour chiffrer et déchiffrer
+        resultat = machine.encrypt(texte, keep_spaces=True, group_5=False) # Sans groupage 5 ici, plus besoin 
 
-        from components.ui import show_info  # import local pour éviter un import circulaire
-        show_info("Résultat", f"Texte {mode} :\n\n{resultat}")
+        # Calcul du texte d'évaluation de la complexité à partir de la config
+        texte_complexite = Menu.evaluer_complexite(config)
+
+        # Affiche une fenêtre avec le résultat + bouton "Voir l'évaluation de la complexité"
+        afficher_resultat_avec_complexite(mode, resultat, texte_complexite)
+
+        #show_info("Résultat", f"Texte {mode} :\n\n{resultat}")
 
     @staticmethod
     def quitter():
