@@ -32,6 +32,8 @@ def demander_rotors_gui(n=3, rotors_possibles=None):
     """
     Ouvre une fenêtre avec n menus déroulants pour choisir les rotors.
     La hauteur de la fenêtre s'adapte automatiquement au nombre de rotors.
+    Retourne une liste de noms de rotors, ou None si l'utilisateur clique sur Retour
+    ou ferme la fenêtre.
     """
     if rotors_possibles is None:
         rotors_possibles = ["I", "II", "III", "IV", "V", "VI", "VII", "VIII"]
@@ -60,6 +62,11 @@ def demander_rotors_gui(n=3, rotors_possibles=None):
         padding=6,
         font=("Segoe UI", 10)
     )
+    style.configure(
+        "Return.TButton",
+        padding=6,
+        font=("Segoe UI", 10, "bold")
+    )
 
     frame = ttk.Frame(win, padding=20)
     frame.pack(fill="both", expand=True)
@@ -82,30 +89,39 @@ def demander_rotors_gui(n=3, rotors_possibles=None):
         combo.grid(row=i+1, column=1, padx=10, pady=5, sticky="w")
         combos.append(combo)
 
-    result = []
+    result = {"values": None}
 
     def valider():
-        nonlocal result
-        result = [c.get() for c in combos]
+        result["values"] = [c.get() for c in combos]
+        win.destroy()
+
+    def retour():
+        result["values"] = None
         win.destroy()
 
     def on_close():
-        result.clear()
+        result["values"] = None
         win.destroy()
 
     win.protocol("WM_DELETE_WINDOW", on_close)
 
-    btn = ttk.Button(frame, text="Valider", style="Menu.TButton", command=valider)
-    btn.grid(row=n+1, column=0, columnspan=2, pady=(10, 0))
+    # Ligne de boutons : Valider / Retour
+    btn_valider = ttk.Button(frame, text="Valider", style="Menu.TButton", command=valider)
+    btn_valider.grid(row=n+1, column=0, pady=(10, 0), padx=5, sticky="e")
+
+    btn_retour = ttk.Button(frame, text="Retour", style="Return.TButton", command=retour)
+    btn_retour.grid(row=n+1, column=1, pady=(10, 0), padx=5, sticky="w")
 
     root.wait_window(win)
 
-    return result if result else None
+    return result["values"]
 
 
 def demander_positions_gui(n=3):
     """
     Ouvre une fenêtre adaptée automatiquement au nombre de rotors.
+    Retourne une liste de lettres (positions) ou None si l'utilisateur clique sur Retour
+    ou ferme la fenêtre.
     """
     letters = [chr(ord('A') + i) for i in range(26)]
 
@@ -113,7 +129,6 @@ def demander_positions_gui(n=3):
     win.title("Positions initiales des rotors")
     win.resizable(False, False)
     win.grab_set()
-
 
     base_height = 180
     per_rotor = 45
@@ -129,6 +144,7 @@ def demander_positions_gui(n=3):
     except tk.TclError:
         pass
     style.configure("Menu.TButton", padding=6, font=("Segoe UI", 10))
+    style.configure("Return.TButton", padding=6, font=("Segoe UI", 10, "bold"))
 
     frame = ttk.Frame(win, padding=20)
     frame.pack(fill="both", expand=True)
@@ -149,28 +165,33 @@ def demander_positions_gui(n=3):
         combo = ttk.Combobox(frame, values=letters, state="readonly", width=5)
         combo.current(0)
         combo.grid(row=i+1, column=1, padx=10, pady=5, sticky="w")
-
         combos.append(combo)
 
-    result = []
+    result = {"values": None}
 
     def valider():
-        nonlocal result
-        result = [c.get() for c in combos]
+        result["values"] = [c.get() for c in combos]
+        win.destroy()
+
+    def retour():
+        result["values"] = None
         win.destroy()
 
     def on_close():
-        result.clear()
+        result["values"] = None
         win.destroy()
 
     win.protocol("WM_DELETE_WINDOW", on_close)
 
-    btn = ttk.Button(frame, text="Valider", style="Menu.TButton", command=valider)
-    btn.grid(row=n+1, column=0, columnspan=2, pady=(10, 0))
+    btn_valider = ttk.Button(frame, text="Valider", style="Menu.TButton", command=valider)
+    btn_valider.grid(row=n+1, column=0, pady=(10, 0), padx=5, sticky="e")
+
+    btn_retour = ttk.Button(frame, text="Retour", style="Return.TButton", command=retour)
+    btn_retour.grid(row=n+1, column=1, pady=(10, 0), padx=5, sticky="w")
 
     root.wait_window(win)
 
-    return result if result else None
+    return result["values"]
 
 
 def popup_menu(title, message, options, include_back=False):

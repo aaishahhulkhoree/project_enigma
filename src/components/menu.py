@@ -29,25 +29,50 @@ class Menu:
 
     @staticmethod
     def configurer_manuellement():
-        rotors = demander_rotors()
-        if rotors is None:
-            return None
+        """
+        Enchaîne 3 étapes :
+        1) Choix du nombre de rotors + des rotors
+        2) Choix des positions initiales
+        3) Choix du plugboard
 
-        n = len(rotors)
-        positions = demander_positions(n=n)
-        if positions is None:
-            return None
+        Comportement des boutons Retour :
+        - Retour dans la fenêtre des ROTORS  → retour au menu précédent (chiffrement/déchiffrement)
+        - Retour dans la fenêtre des POSITIONS → retour à l'étape 1 (choix des rotors)
+        - Retour dans la fenêtre du PLUGBOARD → retour à l'étape 2 (positions)
+        """
+        while True:  # boucle "globale" = on peut revenir jusqu'au choix des rotors
+            # --- Étape 1 : rotors (nombre + noms) ---
+            rotors = demander_rotors()
+            if rotors is None:
+                # Retour demandé à cette étape -> on sort vers le menu chiffrement/déchiffrement
+                return None
 
-        plugboard = demander_plugboard()
-        if plugboard is None:
-            return None
+            n = len(rotors)
 
-        return {
-            "mode": "manuel",
-            "rotors": rotors,
-            "positions": positions,
-            "plugboard": plugboard,
-        }
+            # --- Étape 2 & 3 : positions puis plugboard ---
+            while True:
+                # Étape 2 : positions
+                positions = demander_positions(n)
+                if positions is None:
+                    # Retour demandé depuis la fenêtre des positions :
+                    # on sort de la boucle interne et on revient au choix des rotors
+                    break
+
+                # Étape 3 : plugboard
+                plugboard = demander_plugboard()
+                if plugboard is None:
+                    # Retour demandé dans le plugboard :
+                    # on reste avec les mêmes rotors, mais on retourne à l'étape positions
+                    continue
+
+                # Si on arrive ici, tout est correctement renseigné
+                return {
+                    "mode": "manuel",
+                    "rotors": rotors,
+                    "positions": positions,
+                    "plugboard": plugboard,
+                }
+
 
     @staticmethod
     def menu_chiffrement():
