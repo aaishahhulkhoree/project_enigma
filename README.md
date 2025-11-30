@@ -25,16 +25,20 @@ project_enigma/
 ├─ src/
 │ ├─ components/
 │ │ ├─ plugboard.py  
-│ │ ├─ reflecteur.py 
-│ │ └─ rotor.py
+│ │ ├─ reflecteur.py
+│ │ ├─ rotor.py
+│ │ ├─ menu.py
+│ │ ├─ ui.py  
+│ │ ├─ machineEnigma.py
+│ │ └─ configEnigma.py
 │ ├─ configuration/
-│ │ └─ settings.py
+│ │ └─ configuration.py
+│ ├─ data/
+│ │ ├─ livre_code.json
 │ ├─ utils/
 │ │ ├─ formatage.py
 │ │ └─ nettoyage.py
 │ └─ main.py
-├─ tests/
-│ └─ test_plugboard.py
 └─ README.md
 ```
 ---
