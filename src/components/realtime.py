@@ -32,7 +32,7 @@ def demander_code_secret() -> str | None:
     Sortie : (tk.Toplevel, tk.Text, tk.Text)
     Crée la fenêtre Tkinter du mode temps réel et tous les widgets.
     """
-def creer_fenetre_mode_reel(rotors, positions, plugboard, secret_code: str):
+def creer_fenetre_mode_reel(rotors, positions, ring_settings, plugboard, secret_code: str):
     win = tk.Toplevel(root)
     win.title("Enigma - Mode temps réel")
     win.resizable(True, True)
@@ -67,6 +67,7 @@ def creer_fenetre_mode_reel(rotors, positions, plugboard, secret_code: str):
         texte_cfg = (
             f"Rotors : {', '.join(rotors)}\n"
             f"Positions : {positions}\n"
+            f"Ringstellung : {''.join(chr(ord('A') + r) for r in ring_settings)}\n"
             f"Plugboard : {' '.join(plugboard) if plugboard else 'aucune'}"
         )
         show_info("Configuration Enigma", texte_cfg)
@@ -137,7 +138,8 @@ def connecter_logique_chiffrement(txt_plain: tk.Text,
                                   txt_cipher: tk.Text,
                                   rotors,
                                   positions: str,
-                                  plugboard):
+                                  plugboard,
+                                  ring_settings):
     
 
     def update_cipher(event=None):
@@ -147,7 +149,8 @@ def connecter_logique_chiffrement(txt_plain: tk.Text,
             rotors_names=rotors,
             positions=positions,
             plug_pairs=plugboard,
-            reflector_preset="B"
+            reflector_preset="B",
+            ring_settings=ring_settings
         )
 
         cipher = machine.encrypt(text, keep_spaces=True, group_5=False)
@@ -168,6 +171,7 @@ def connecter_logique_chiffrement(txt_plain: tk.Text,
 def lancer_mode_temps_reel(config):
     rotors = config["rotors"]
     positions = "".join(config["positions"])
+    ring_settings = config.get("rings", [0] * len(rotors))
     plugboard = config["plugboard"]
 
     # 1) Demander le code secret
@@ -179,6 +183,7 @@ def lancer_mode_temps_reel(config):
     win, txt_plain, txt_cipher = creer_fenetre_mode_reel(
         rotors=rotors,
         positions=positions,
+        ring_settings=ring_settings,
         plugboard=plugboard,
         secret_code=secret_code
     )
@@ -189,6 +194,7 @@ def lancer_mode_temps_reel(config):
         txt_cipher=txt_cipher,
         rotors=rotors,
         positions=positions,
+        ring_settings=ring_settings,
         plugboard=plugboard
     )
 

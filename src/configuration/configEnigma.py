@@ -3,7 +3,7 @@ import os
 import json
 from datetime import date
 
-from ui.ui import show_info,show_error,demander_rotors_gui,demander_positions_gui,input_dialog
+from ui.ui import show_info,show_error,demander_rotors_gui,demander_positions_gui, demander_rings_gui,input_dialog
 from configuration.configuration import load_codebook
 
 # -------------------------------------------
@@ -62,6 +62,42 @@ def demander_positions(n=3):
             continue
 
         return positions
+
+
+def demander_ring_settings(n=3):
+    """ Entrée : n (nombre de rotors)
+    Sortie : liste d'entiers [0-25] ou None si Retour/annulation.
+    Demande les Ring settings (Ringstellung) pour n rotors via une fenêtre graphique."""
+    while True:
+        lettres = demander_rings_gui(n=n)
+
+        if lettres is None:
+            return None
+
+        if len(lettres) != n:
+            show_error(
+                "Erreur Ringstellung",
+                f"Vous devez choisir exactement {n} lettres."
+            )
+            continue
+
+        ok = True
+        rings = []
+        for c in lettres:
+            c = (c or "").strip().upper()
+            if len(c) != 1 or c < "A" or c > "Z":
+                ok = False
+                break
+            rings.append(ord(c) - ord("A"))
+
+        if not ok:
+            show_error(
+                "Erreur Ringstellung",
+                "Les Ring settings doivent être des lettres A–Z."
+            )
+            continue
+
+        return rings
 
 
 def demander_plugboard(max_paires=10, allow_back=True):
@@ -204,6 +240,22 @@ def charger_config_livre_code(nb_rotors: int | None = None):
     rotors = entry["rotors"]
     positions = entry["positions"]
     plugboard = entry["plugboard"]
+    
+    rings_raw = entry.get("rings") # peut être absent car optionnel
+    if rings_raw is None:
+        rings = [0] * len(rotors)
+    else:
+        rings_raw = rings_raw.strip().upper()
+        if len(rings_raw) != len(rotors):
+            show_error(
+                "Livre de code",
+                f"Le champ 'rings' ({rings_raw}) ne contient pas autant de lettres "
+                f"que de rotors ({len(rotors)})."
+            )
+            return None
+        rings = [ord(c) - ord("A") for c in rings_raw]
+
+
 
     if nb_rotors is not None:
         if len(rotors) < nb_rotors or len(positions) < nb_rotors:
@@ -215,6 +267,7 @@ def charger_config_livre_code(nb_rotors: int | None = None):
             return None
         rotors = rotors[:nb_rotors]
         positions = positions[:nb_rotors]
+        rings = rings[:nb_rotors]
     else:
         nb_rotors = len(rotors)
 
@@ -227,5 +280,6 @@ def charger_config_livre_code(nb_rotors: int | None = None):
     return {
         "rotors": rotors,
         "positions": positions,
+        "rings": rings, 
         "plugboard": plugboard,
     }
