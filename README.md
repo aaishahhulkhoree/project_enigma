@@ -25,9 +25,9 @@ Ce projet a pour but de **simuler le fonctionnement de la machine Enigma** utili
 Il permet de comprendre les principes de **substitution**, **permutation** et de **réflexion** utilisés dans le chiffrement.
 
 L’objectif est pédagogique :  
-1)Comprendre les bases de la cryptographie symétrique  
-2)Reproduire les composants essentiels de la machine (Plugboard, Rotors, Reflecteur)  
-3)Pouvoir chiffrer/déchiffrer un message en configurant soi-même les éléments  
+1) Comprendre les bases de la cryptographie symétrique  
+2) Reproduire les composants essentiels de la machine (Plugboard, Rotors, Reflecteur)  
+3) Pouvoir chiffrer/déchiffrer un message en configurant soi-même les éléments  
 
 ---
 
@@ -46,17 +46,20 @@ Project Enigma reproduit, de façon pédagogique, le comportement d'une Enigma m
 project_enigma/
 ├─ src/
 │ ├─ components/
+│ │ ├─ menu.py
+│ │ └─ realtime.py
+│ ├─ configuration/
+│ │ └─ configEnigma.py
+│ │ ├─ configuration.py
+| ├─ core/
+│ │ ├─ machineEnigma.py
 │ │ ├─ plugboard.py  
 │ │ ├─ reflecteur.py
-│ │ ├─ rotor.py
-│ │ ├─ menu.py
-│ │ ├─ ui.py  
-│ │ ├─ machineEnigma.py
-│ │ └─ configEnigma.py
-│ ├─ configuration/
-│ │ └─ configuration.py
+│ │ ├─ rotors.py
 │ ├─ data/
 │ │ ├─ livre_code.json
+| ├─ ui/
+│ │ ├─ ui.py
 │ ├─ utils/
 │ │ ├─ formatage.py
 │ │ └─ nettoyage.py
