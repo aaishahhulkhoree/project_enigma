@@ -18,7 +18,7 @@ ROTORS: Dict[str, Tuple[str, str]] = {
     "VIII":("FKQHTLXOCBJSPDZRAMEWNIUYGV", "M")
 }
 
-# Définitions des réflecteurs UKW-B et UKW-C
+# Définitions des réflecteurs UKW-A, UKW-B et UKW-C
 # Format: "ReflectorName": wiring_str
 # wiring_str: 26 lettres indiquant le câblage
 # Exemple: A<->Y, B<->R, etc.
