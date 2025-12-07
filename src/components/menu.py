@@ -2,7 +2,7 @@ import math
 
 from ui.ui import show_error, popup_menu, input_dialog, afficher_resultat_avec_complexite
 from core.machineEnigma import MachineEnigma
-from configuration.configEnigma import (demander_rotors,demander_positions,demander_plugboard,demander_nb_rotors_livre,charger_config_livre_code)
+from configuration.configEnigma import (demander_rotors,demander_positions, demander_ring_settings,demander_plugboard,demander_nb_rotors_livre,charger_config_livre_code)
 from components.realtime import lancer_mode_temps_reel
 
 
@@ -85,17 +85,19 @@ class Menu:
     @staticmethod
     def configurer_manuellement():
         """
-        Enchaîne 3 étapes :
+        Enchaîne 4 étapes :
         1) Choix du nombre de rotors + des rotors
         2) Choix des positions initiales
-        3) Choix du plugboard
+        3) Choix des Ring settings (Ringstellung)
+        4) Choix du plugboard
 
-        Comportement des boutons Retour :
-        - Retour dans la fenêtre des ROTORS  → retour au menu précédent (chiffrement/déchiffrement)
-        - Retour dans la fenêtre des POSITIONS → retour à l'étape 1 (choix des rotors)
-        - Retour dans la fenêtre du PLUGBOARD → retour à l'étape 2 (positions)
+        Boutons Retour :
+        - Retour dans ROTORS  → retour au menu précédent (chiffrement/déchiffrement)
+        - Retour dans POSITIONS → retour à l'étape 1 (choix des rotors)
+        - Retour dans RING SETTINGS → retour à l'étape 2 (positions)
+        - Retour dans le PLUGBOARD → retour à l'étape 3 (ring settings)
         """
-        while True:  # boucle "globale" = on peut revenir jusqu'au choix des rotors
+        while True:  # boucle globale = on peut revenir jusqu'au choix des rotors
             # --- Étape 1 : rotors (nombre + noms) ---
             rotors = demander_rotors()
             if rotors is None:
@@ -104,7 +106,7 @@ class Menu:
 
             n = len(rotors)
 
-            # --- Étape 2 & 3 : positions puis plugboard ---
+            # --- Étapes 2, 3, 4 : positions, ring settings, plugboard ---
             while True:
                 # Étape 2 : positions
                 positions = demander_positions(n)
@@ -113,19 +115,27 @@ class Menu:
                     # on sort de la boucle interne et on revient au choix des rotors
                     break
 
-                # Étape 3 : plugboard
+                # Étape 3 : Ring settings
+                ring_settings = demander_ring_settings(n)
+                if ring_settings is None:
+                    # Retour demandé -> revenir à l'étape 2 (positions)
+                    continue
+
+                # Étape 4 : plugboard
                 plugboard = demander_plugboard()
                 if plugboard is None:
                     # Retour demandé dans le plugboard :
-                    # on reste avec les mêmes rotors, mais on retourne à l'étape positions
+                    # on garde rotors + positions + ring_settings,
+                    # mais on revient à l'étape 3 (ring settings)
                     continue
 
                 # Si on arrive ici, tout est correctement renseigné
                 return {
                     "mode": "manuel",
                     "rotors": rotors,
-                    "positions": positions,
+                    "positions": positions,       # liste de lettres
                     "plugboard": plugboard,
+                    "rings": ring_settings,       # liste d'entiers 0-25
                 }
 
 
@@ -158,7 +168,9 @@ class Menu:
                     "mode": "livre_de_code",
                     "rotors": entry["rotors"],
                     "positions": list(entry["positions"]),
+                    "rings": entry["rings"],
                     "plugboard": entry["plugboard"],
+    
                 }
 
             if choix == "2":
@@ -196,6 +208,7 @@ class Menu:
                     "mode": "livre_de_code",
                     "rotors": entry["rotors"],
                     "positions": list(entry["positions"]),
+                    "rings": entry["rings"],
                     "plugboard": entry["plugboard"],
                 }
 
@@ -212,9 +225,13 @@ class Menu:
     def lancer_machine(config, mode: str):
         rotors = config["rotors"]
         positions = "".join(config["positions"])
+        ring_settings = config.get("rings")
+        if ring_settings is None:
+            ring_settings = [0] * len(rotors)
         plugboard = config["plugboard"]
 
-        machine = MachineEnigma(rotors_names=rotors,positions=positions,plug_pairs=plugboard,reflector_preset="B")
+
+        machine = MachineEnigma(rotors_names=rotors,positions=positions,ring_settings=ring_settings,plug_pairs=plugboard,reflector_preset="B")
 
         texte = input_dialog("Message", f"Entrez le message à {mode} :", allow_back=True)
         if texte is None or not texte.strip():

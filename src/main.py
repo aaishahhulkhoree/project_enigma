@@ -40,6 +40,7 @@ def main():
     machine = MachineEnigma(
         rotors_names=entry["rotors"],
         positions=entry["positions"],
+        ring_settings=entry.get("rings", [0] * len(entry["rotors"])),
         plug_pairs=entry["plugboard"],
         reflector_preset="B",
     )

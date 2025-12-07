@@ -16,14 +16,12 @@ def center_window(win):
 
     win.geometry(f"{w}x{h}+{x}+{y}")
 
-
 def demander_texte(title: str, prompt: str) -> str | None:
     """Demande une chaîne à l'utilisateur via une pop-up."""
     return simpledialog.askstring(title, prompt, parent=root)
 
 def show_info(title: str, message: str):
     messagebox.showinfo(title, message, parent=root)
-
 
 def show_error(title: str, message: str):
     messagebox.showerror(title, message, parent=root)
@@ -116,7 +114,6 @@ def demander_rotors_gui(n=3, rotors_possibles=None):
 
     return result["values"]
 
-
 def demander_positions_gui(n=3):
     """
     Ouvre une fenêtre adaptée automatiquement au nombre de rotors.
@@ -151,7 +148,7 @@ def demander_positions_gui(n=3):
 
     lbl = ttk.Label(
         frame,
-        text="Choisissez la position initiale de chaque rotor :",
+        text="Choisissez la position initiale (grundstellung) de chaque rotor :",
         justify="center",
         wraplength=400
     )
@@ -193,15 +190,95 @@ def demander_positions_gui(n=3):
 
     return result["values"]
 
-"""Entrées : 
+def demander_rings_gui(n=3):
+    """
+    Ouvre une fenêtre adaptée automatiquement au nombre de rotors
+    pour choisir les Ringstellungen (Ring settings) de chaque rotor.
+
+    Retourne une liste de lettres (A–Z) ou None si l'utilisateur clique sur Retour
+    ou ferme la fenêtre.
+    """
+    letters = [chr(ord('A') + i) for i in range(26)]
+
+    win = tk.Toplevel(root)
+    win.title("Ringstellung des rotors (Ring settings)")
+    win.resizable(False, False)
+    win.grab_set()
+
+    base_height = 180
+    per_rotor = 45
+    dynamic_height = base_height + n * per_rotor
+    win.minsize(450, dynamic_height)
+
+    win.update_idletasks()
+    center_window(win)
+
+    style = ttk.Style(win)
+    try:
+        style.theme_use("clam")
+    except tk.TclError:
+        pass
+    style.configure("Menu.TButton", padding=6, font=("Segoe UI", 10))
+    style.configure("Return.TButton", padding=6, font=("Segoe UI", 10, "bold"))
+
+    frame = ttk.Frame(win, padding=20)
+    frame.pack(fill="both", expand=True)
+
+    lbl = ttk.Label(
+        frame,
+        text=(
+            "Choisissez la Ringstellung (bague interne) de chaque rotor :\n"
+            "Ce réglage décale le câblage interne par rapport aux lettres visibles."
+        ),
+        justify="center",
+        wraplength=400
+    )
+    lbl.grid(row=0, column=0, columnspan=2, pady=(0, 10))
+
+    combos = []
+    for i in range(n):
+        l = ttk.Label(frame, text=f"Rotor {i+1} :")
+        l.grid(row=i+1, column=0, padx=10, pady=5, sticky="e")
+
+        combo = ttk.Combobox(frame, values=letters, state="readonly", width=5)
+        combo.current(0)  # A par défaut
+        combo.grid(row=i+1, column=1, padx=10, pady=5, sticky="w")
+        combos.append(combo)
+
+    result = {"values": None}
+
+    def valider():
+        result["values"] = [c.get() for c in combos]
+        win.destroy()
+
+    def retour():
+        result["values"] = None
+        win.destroy()
+
+    def on_close():
+        result["values"] = None
+        win.destroy()
+
+    win.protocol("WM_DELETE_WINDOW", on_close)
+
+    btn_valider = ttk.Button(frame, text="Valider", style="Menu.TButton", command=valider)
+    btn_valider.grid(row=n+1, column=0, pady=(10, 0), padx=5, sticky="e")
+
+    btn_retour = ttk.Button(frame, text="Retour", style="Return.TButton", command=retour)
+    btn_retour.grid(row=n+1, column=1, pady=(10, 0), padx=5, sticky="w")
+
+    root.wait_window(win)
+
+    return result["values"]
+
+def popup_menu(title, message, options, include_back=False):
+    """Entrées : 
         title (str) : Titre de la fenêtre
         message (str) : Message à afficher en haut
         options (dict) : Dictionnaire clé->texte des options (ex: {"1": "Option 1", "2": "Option 2"})
         include_back (bool) : Si True, ajoute un bouton Retour
     Sortie : clé choisie (str) ou "R" si Retour, ou None si la fenêtre est fermée
     Affiche une fenêtre avec un message et des boutons pour chaque option"""
-def popup_menu(title, message, options, include_back=False):
-
     win = tk.Toplevel(root)
     win.title(title)
     win.resizable(False, False)
@@ -259,7 +336,6 @@ def popup_menu(title, message, options, include_back=False):
 
     root.wait_window(win)
     return result["choice"]
-
 
 def input_dialog(title, message, initial_value: str = "", allow_back: bool = False) -> str | None:
     """
@@ -329,7 +405,6 @@ def input_dialog(title, message, initial_value: str = "", allow_back: bool = Fal
 
     root.wait_window(win)
     return result["text"]
-
 
 def afficher_resultat_avec_complexite(mode: str, texte_resultat: str, texte_complexite: str):
     """

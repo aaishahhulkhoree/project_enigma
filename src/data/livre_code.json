@@ -1,192 +1,171 @@
-{   
-    "2025-11-26": {
-        "rotors": ["I", "II", "III", "IV", "V", "VI", "VII", "VIII"],
-        "positions": "ABCDEFGH",
-        "plugboard": ["QW", "ER", "TY", "UI", "OP", "AS", "DF", "GH", "JK", "LZ"]
-    },
-    "2025-11-27": {
-        "rotors": ["II", "III", "IV", "V", "VI", "VII", "VIII", "I"],
-        "positions": "HGFEDCBA",
-        "plugboard": ["ZX", "CV", "BN", "ML", "KJ", "IH", "GF", "ED", "RT", "YU"]
-    },
-    "2025-11-28": {
-        "rotors": ["III", "IV", "V", "VI", "VII", "VIII", "I", "II"],
-        "positions": "BCDAEFGH",
-        "plugboard": ["PL", "OK", "MI", "NJ", "BH", "GV", "FT", "RE", "DC", "XS"]
-    },
-    "2025-11-29": {
-        "rotors": ["IV", "V", "VI", "VII", "VIII", "I", "II", "III"],
-        "positions": "HGFABCED",
-        "plugboard": ["AQ", "WS", "ED", "RF", "TG", "YH", "UJ", "IK", "OL", "PZ"]
-    },
-    "2025-11-30": {
-        "rotors": ["V", "VI", "VII", "VIII", "I", "II", "III", "IV"],
-        "positions": "CDEFGHAB",
-        "plugboard": ["PO", "IU", "YT", "RE", "WQ", "AS", "DF", "GH", "JK", "LZ"]
-    },
-    "2025-12-01": {
-        "rotors": ["VI", "VII", "VIII", "I", "II", "III", "IV", "V"],
-        "positions": "ABCDEFGH",
-        "plugboard": ["AX", "BV", "CW", "DR", "ES", "FT", "GU", "HO", "IN", "JM"]
-    },
-    "2025-12-02": {
-        "rotors": ["VII", "VIII", "I", "II", "III", "IV", "V", "VI"],
-        "positions": "HGFEDCBA",
-        "plugboard": ["QY", "WT", "ER", "IP", "UO", "AS", "DF", "GJ", "HK", "LZ"]
-    },
-    "2025-12-03": {
-        "rotors": ["VIII", "I", "II", "III", "IV", "V", "VI", "VII"],
-        "positions": "BCDAEFGH",
-        "plugboard": ["ZX", "CV", "BN", "ML", "KJ", "IH", "GF", "ED", "RT", "YU"]
-    },
-    "2025-12-04": {
-        "rotors": ["I", "II", "III", "IV", "V", "VI", "VII", "VIII"],
-        "positions": "HGFABCED",
-        "plugboard": ["PL", "OK", "MI", "NJ", "BH", "GV", "FT", "RE", "DC", "XS"]
-    },
-    "2025-12-05": {
-        "rotors": ["II", "III", "IV", "V", "VI", "VII", "VIII", "I"],
-        "positions": "CDEFGHAB",
-        "plugboard": ["AQ", "WS", "ED", "RF", "TG", "YH", "UJ", "IK", "OL", "PZ"]
-    },
+{
     "2025-12-06": {
         "rotors": ["III", "IV", "V", "VI", "VII", "VIII", "I", "II"],
-        "positions": "ABCDEFGH",
-        "plugboard": ["PO", "IU", "YT", "RE", "WQ", "AS", "DF", "GH", "JK", "LZ"]
+        "positions": "JKLMNOPQ",
+        "rings": "BBAABBCB",
+        "plugboard": ["AS", "DF", "GH", "JK", "LZ", "XW", "ER", "TY", "MU", "OP"]
     },
     "2025-12-07": {
         "rotors": ["IV", "V", "VI", "VII", "VIII", "I", "II", "III"],
-        "positions": "HGFEDCBA",
-        "plugboard": ["AX", "BV", "CW", "DR", "ES", "FT", "GU", "HO", "IN", "JM"]
+        "positions": "LMNOPQRS",
+        "rings": "BBAABBCC",
+        "plugboard": ["DF", "GH", "JK", "LZ", "XW", "ER", "TY", "MU", "OP", "AS"]
     },
     "2025-12-08": {
         "rotors": ["V", "VI", "VII", "VIII", "I", "II", "III", "IV"],
-        "positions": "BCDAEFGH",
-        "plugboard": ["QY", "WT", "ER", "IP", "UO", "AS", "DF", "GJ", "HK", "LZ"]
+        "positions": "MNOPQRST",
+        "rings": "BBAABBCD",
+        "plugboard": ["LZ", "XW", "ER", "TY", "MU", "OP", "AS", "DF", "GH", "JK"]
     },
     "2025-12-09": {
         "rotors": ["VI", "VII", "VIII", "I", "II", "III", "IV", "V"],
-        "positions": "HGFABCED",
-        "plugboard": ["ZX", "CV", "BN", "ML", "KJ", "IH", "GF", "ED", "RT", "YU"]
+        "positions": "NOPQRSTU",
+        "rings": "BBAABBCE",
+        "plugboard": ["XW", "ER", "TY", "MU", "OP", "AS", "DF", "GH", "JK", "LZ"]
     },
     "2025-12-10": {
         "rotors": ["VII", "VIII", "I", "II", "III", "IV", "V", "VI"],
-        "positions": "CDEFGHAB",
-        "plugboard": ["PL", "OK", "MI", "NJ", "BH", "GV", "FT", "RE", "DC", "XS"]
+        "positions": "OPQRSTUV",
+        "rings": "BBAABBCF",
+        "plugboard": ["ER", "TY", "MU", "OP", "AS", "DF", "GH", "JK", "LZ", "XW"]
     },
     "2025-12-11": {
         "rotors": ["VIII", "I", "II", "III", "IV", "V", "VI", "VII"],
-        "positions": "ABCDEFGH",
-        "plugboard": ["AQ", "WS", "ED", "RF", "TG", "YH", "UJ", "IK", "OL", "PZ"]
+        "positions": "PQRSTUVX",
+        "rings": "BBAABBCG",
+        "plugboard": ["TY", "MU", "OP", "AS", "DF", "GH", "JK", "LZ", "XW", "ER"]
     },
     "2025-12-12": {
         "rotors": ["I", "II", "III", "IV", "V", "VI", "VII", "VIII"],
-        "positions": "HGFEDCBA",
-        "plugboard": ["PO", "IU", "YT", "RE", "WQ", "AS", "DF", "GH", "JK", "LZ"]
+        "positions": "QRSTUVWX",
+        "rings": "BBAABBCX",
+        "plugboard": ["MU", "OP", "AS", "DF", "GH", "JK", "LZ", "XW", "ER", "TY"]
     },
     "2025-12-13": {
         "rotors": ["II", "III", "IV", "V", "VI", "VII", "VIII", "I"],
-        "positions": "BCDAEFGH",
-        "plugboard": ["AX", "BV", "CW", "DR", "ES", "FT", "GU", "HO", "IN", "JM"]
+        "positions": "RSTUVWXZ",
+        "rings": "BBAABBCA",
+        "plugboard": ["OP", "AS", "DF", "GH", "JK", "LZ", "XW", "ER", "TY", "MU"]
     },
     "2025-12-14": {
         "rotors": ["III", "IV", "V", "VI", "VII", "VIII", "I", "II"],
-        "positions": "HGFABCED",
-        "plugboard": ["QY", "WT", "ER", "IP", "UO", "AS", "DF", "GJ", "HK", "LZ"]
+        "positions": "STUVWXZA",
+        "rings": "BBAABBCB",
+        "plugboard": ["AS", "DF", "GH", "JK", "LZ", "XW", "ER", "TY", "MU", "OP"]
     },
     "2025-12-15": {
         "rotors": ["IV", "V", "VI", "VII", "VIII", "I", "II", "III"],
-        "positions": "CDEFGHAB",
-        "plugboard": ["ZX", "CV", "BN", "ML", "KJ", "IH", "GF", "ED", "RT", "YU"]
+        "positions": "TUVWXZAB",
+        "rings": "BBAABBCC",
+        "plugboard": ["DF", "GH", "JK", "LZ", "XW", "ER", "TY", "MU", "OP", "AS"]
     },
     "2025-12-16": {
         "rotors": ["V", "VI", "VII", "VIII", "I", "II", "III", "IV"],
-        "positions": "ABCDEFGH",
-        "plugboard": ["PL", "OK", "MI", "NJ", "BH", "GV", "FT", "RE", "DC", "XS"]
+        "positions": "UVWXZABC",
+        "rings": "BBAABBCD",
+        "plugboard": ["GH", "JK", "LZ", "XW", "ER", "TY", "MU", "OP", "AS", "DF"]
     },
     "2025-12-17": {
         "rotors": ["VI", "VII", "VIII", "I", "II", "III", "IV", "V"],
-        "positions": "HGFEDCBA",
-        "plugboard": ["AQ", "WS", "ED", "RF", "TG", "YH", "UJ", "IK", "OL", "PZ"]
+        "positions": "VWXZABCD",
+        "rings": "BBAABBCE",
+        "plugboard": ["JK", "LZ", "XW", "ER", "TY", "MU", "OP", "AS", "DF", "GH"]
     },
     "2025-12-18": {
         "rotors": ["VII", "VIII", "I", "II", "III", "IV", "V", "VI"],
-        "positions": "BCDAEFGH",
-        "plugboard": ["PO", "IU", "YT", "RE", "WQ", "AS", "DF", "GH", "JK", "LZ"]
+        "positions": "WXZABCDE",
+        "rings": "BBAABBCF",
+        "plugboard": ["LZ", "XW", "ER", "TY", "MU", "OP", "AS", "DF", "GH", "JK"]
     },
     "2025-12-19": {
         "rotors": ["VIII", "I", "II", "III", "IV", "V", "VI", "VII"],
-        "positions": "HGFABCED",
-        "plugboard": ["AX", "BV", "CW", "DR", "ES", "FT", "GU", "HO", "IN", "JM"]
+        "positions": "XZABCDEF",
+        "rings": "BBAABBCG",
+        "plugboard": ["XW", "ER", "TY", "MU", "OP", "AS", "DF", "GH", "JK", "LZ"]
     },
     "2025-12-20": {
         "rotors": ["I", "II", "III", "IV", "V", "VI", "VII", "VIII"],
-        "positions": "CDEFGHAB",
-        "plugboard": ["QY", "WT", "ER", "IP", "UO", "AS", "DF", "GJ", "HK", "LZ"]
-    }, 
+        "positions": "ZABCDEFG",
+        "rings": "BBAABBCX",
+        "plugboard": ["ER", "TY", "MU", "OP", "AS", "DF", "GH", "JK", "LZ", "XW"]
+    },
     "2025-12-21": {
         "rotors": ["II", "III", "IV", "V", "VI", "VII", "VIII", "I"],
         "positions": "ABCDEFGH",
-        "plugboard": ["ZX", "CV", "BN", "ML", "KJ", "IH", "GF", "ED", "RT", "YU"]
+        "rings": "BBAABBCA",
+        "plugboard": ["TY", "MU", "OP", "AS", "DF", "GH", "JK", "LZ", "XW", "ER"]
     },
     "2025-12-22": {
         "rotors": ["III", "IV", "V", "VI", "VII", "VIII", "I", "II"],
-        "positions": "HGFEDCBA",
-        "plugboard": ["PL", "OK", "MI", "NJ", "BH", "GV", "FT", "RE", "DC", "XS"]
+        "positions": "BCDEFGHI",
+        "rings": "BBAABBCB",
+        "plugboard": ["MU", "OP", "AS", "DF", "GH", "JK", "LZ", "XW", "ER", "TY"]
     },
     "2025-12-23": {
         "rotors": ["IV", "V", "VI", "VII", "VIII", "I", "II", "III"],
-        "positions": "BCDAEFGH",
-        "plugboard": ["AQ", "WS", "ED", "RF", "TG", "YH", "UJ", "IK", "OL", "PZ"]
+        "positions": "CDEFGHIJ",
+        "rings": "BBAABBCC",
+        "plugboard": ["OP", "AS", "DF", "GH", "JK", "LZ", "XW", "ER", "TY", "MU"]
     },
     "2025-12-24": {
         "rotors": ["V", "VI", "VII", "VIII", "I", "II", "III", "IV"],
-        "positions": "HGFABCED",
-        "plugboard": ["PO", "IU", "YT", "RE", "WQ", "AS", "DF", "GH", "JK", "LZ"]
+        "positions": "DEFGHIJK",
+        "rings": "BBAABBCD",
+        "plugboard": ["AS", "DF", "GH", "JK", "LZ", "XW", "ER", "TY", "MU", "OP"]
     },
     "2025-12-25": {
         "rotors": ["VI", "VII", "VIII", "I", "II", "III", "IV", "V"],
-        "positions": "CDEFGHAB",
-        "plugboard": ["AX", "BV", "CW", "DR", "ES", "FT", "GU", "HO", "IN", "JM"]
+        "positions": "EFGHIJKL",
+        "rings": "BBAABBCE",
+        "plugboard": ["DF", "GH", "JK", "LZ", "XW", "ER", "TY", "MU", "OP", "AS"]
     },
     "2025-12-26": {
         "rotors": ["VII", "VIII", "I", "II", "III", "IV", "V", "VI"],
-        "positions": "ABCDEFGH",
-        "plugboard": ["QY", "WT", "ER", "IP", "UO", "AS", "DF", "GJ", "HK", "LZ"]
+        "positions": "FGHIJKLM",
+        "rings": "BBAABBCF",
+        "plugboard": ["GH", "JK", "LZ", "XW", "ER", "TY", "MU", "OP", "AS", "DF"]
     },
     "2025-12-27": {
         "rotors": ["VIII", "I", "II", "III", "IV", "V", "VI", "VII"],
-        "positions": "HGFEDCBA",
-        "plugboard": ["ZX", "CV", "BN", "ML", "KJ", "IH", "GF", "ED", "RT", "YU"]
+        "positions": "GHIJKLMN",
+        "rings": "BBAABBCG",
+        "plugboard": ["JK", "LZ", "XW", "ER", "TY", "MU", "OP", "AS", "DF", "GH"]
     },
     "2025-12-28": {
         "rotors": ["I", "II", "III", "IV", "V", "VI", "VII", "VIII"],
-        "positions": "BCDAEFGH",
-        "plugboard": ["PL", "OK", "MI", "NJ", "BH", "GV", "FT", "RE", "DC", "XS"]
+        "positions": "HIJKLMNO",
+        "rings": "BBAABBCX",
+        "plugboard": ["LZ", "XW", "ER", "TY", "MU", "OP", "AS", "DF", "GH", "JK"]
     },
     "2025-12-29": {
         "rotors": ["II", "III", "IV", "V", "VI", "VII", "VIII", "I"],
-        "positions": "HGFABCED",
-        "plugboard": ["AQ", "WS", "ED", "RF", "TG", "YH", "UJ", "IK", "OL", "PZ"]
+        "positions": "IJKLMNOP",
+        "rings": "BBAABBCA",
+        "plugboard": ["XW", "ER", "TY", "MU", "OP", "AS", "DF", "GH", "JK", "LZ"]
     },
     "2025-12-30": {
         "rotors": ["III", "IV", "V", "VI", "VII", "VIII", "I", "II"],
-        "positions": "CDEFGHAB",
-        "plugboard": ["PO", "IU", "YT", "RE", "WQ", "AS", "DF", "GH", "JK", "LZ"]
+        "positions": "JKLMNOPQ",
+        "rings": "BBAABBCB",
+        "plugboard": ["ER", "TY", "MU", "OP", "AS", "DF", "GH", "JK", "LZ", "XW"]
     },
     "2025-12-31": {
         "rotors": ["IV", "V", "VI", "VII", "VIII", "I", "II", "III"],
-        "positions": "ABCDEFGH",
-        "plugboard": ["AX", "BV", "CW", "DR", "ES", "FT", "GU", "HO", "IN", "JM"]
+        "positions": "KLMNOPQR",
+        "rings": "BBAABBCC",
+        "plugboard": ["TY", "MU", "OP", "AS", "DF", "GH", "JK", "LZ", "XW", "ER"]
     },
     "2026-01-01": {
         "rotors": ["V", "VI", "VII", "VIII", "I", "II", "III", "IV"],
-        "positions": "HGFEDCBA",
-        "plugboard": ["QY", "WT", "ER", "IP", "UO", "AS", "DF", "GJ", "HK", "LZ"]
-    },  
+        "positions": "LMNOPQRS",
+        "rings": "BBAABBCD",
+        "plugboard": ["MU", "OP", "AS", "DF", "GH", "JK", "LZ", "XW", "ER", "TY"]
+    },
     "2026-01-02": {
         "rotors": ["VI", "VII", "VIII", "I", "II", "III", "IV", "V"],
-        "positions": "BCDAEFGH",
-        "plugboard": ["ZX", "CV", "BN", "ML", "KJ", "IH", "GF", "ED", "RT", "YU"]
+        "positions": "MNOPQRST",
+        "rings": "BBAABBCE",
+        "plugboard": ["OP", "AS", "DF", "GH", "JK", "LZ", "XW", "ER", "TY", "MU"]
     }
+
 }
