@@ -1,7 +1,8 @@
 import tkinter as tk
 
-from ui.ui import root, center_window, show_info, show_error, input_dialog
+from ui.ui import root, center_window, show_info, show_error, input_dialog, popup_menu
 from core.machineEnigma import MachineEnigma
+from configuration.configuration import ALPHABET
 
 
 """ Entrée : None 
@@ -24,6 +25,33 @@ def demander_code_secret() -> str | None:
         return None
     return secret_code
 
+
+def demander_mode_temps_reel() -> bool | None:
+    """
+    Demande à l'utilisateur quel mode temps réel il veut utiliser.
+    Retourne:
+        - True  -> mode historique (stateful)
+        - False -> mode classique (recalcul complet, éditable)
+        - None  -> si l'utilisateur annule
+    """
+    choix = popup_menu(
+        "Mode temps réel",
+        "Choisissez le mode de chiffrement temps réel :",
+        {
+            "1": "Mode classique (texte éditable, recalcul complet)",
+            "2": "Mode historique (stateful, rotors persistants)",
+        },
+        include_back=True,
+    )
+
+    if choix is None or choix == "R":
+        return None
+    if choix == "2":
+        return True
+    return False
+
+
+
 """ Entrée : 
         rotors : liste des noms de rotors
         positions : chaîne des positions initiales
@@ -32,7 +60,7 @@ def demander_code_secret() -> str | None:
     Sortie : (tk.Toplevel, tk.Text, tk.Text)
     Crée la fenêtre Tkinter du mode temps réel et tous les widgets.
     """
-def creer_fenetre_mode_reel(rotors, positions, ring_settings, plugboard, secret_code: str):
+def creer_fenetre_mode_reel(rotors, positions, ring_settings, plugboard, secret_code: str, stateful: bool):
     win = tk.Toplevel(root)
     win.title("Enigma - Mode temps réel")
     win.resizable(True, True)
@@ -51,6 +79,22 @@ def creer_fenetre_mode_reel(rotors, positions, ring_settings, plugboard, secret_
         font=("Segoe UI", 12, "bold")
     )
     title_label.pack(anchor="w", pady=(0, 5))
+
+    mode_label = tk.Label(
+        main_frame,
+        text="Mode : historique (stateful, rotors persistants)" if stateful
+             else "Mode : classique (texte éditable, recalcul complet)",
+        font=("Segoe UI", 9, "italic")
+    )
+    mode_label.pack(anchor="w", pady=(0, 8))
+
+    positions_str = " ".join(list(positions))
+    lbl_positions = tk.Label(
+        main_frame,
+        text=f"Positions des rotors : {positions_str}",
+        font=("Segoe UI", 9)
+    )
+    lbl_positions.pack(anchor="w", pady=(0, 8))
 
     def afficher_config():
         saisie = input_dialog(
@@ -74,7 +118,7 @@ def creer_fenetre_mode_reel(rotors, positions, ring_settings, plugboard, secret_
 
     btn_cfg = tk.Button(
         main_frame,
-        text="Afficher la configuration",
+        text="Afficher la configuration complète",
         command=afficher_config
     )
     btn_cfg.pack(anchor="w", pady=(0, 10))
@@ -123,7 +167,7 @@ def creer_fenetre_mode_reel(rotors, positions, ring_settings, plugboard, secret_
     btn_close = tk.Button(button_frame, text="Retour", command=win.destroy)
     btn_close.pack(side="right")
 
-    return win, txt_plain, txt_cipher
+    return win, txt_plain, txt_cipher, lbl_positions
 
 """ Entrée : 
         txt_plain : tk.Text
@@ -132,72 +176,172 @@ def creer_fenetre_mode_reel(rotors, positions, ring_settings, plugboard, secret_
         positions : chaîne des positions initiales
         plugboard : liste des paires de connexions du plugboard
     Sortie : None
-    Connecte la logique de chiffrement temps réel au champ txt_plain. À chaque frappe, le texte est rechiffré et affiché dans txt_cipher.
+    Connecte la logique de chiffrement temps réel.
+    - stateful=False : mode classique (recalcul complet, texte éditable)
+    - stateful=True  : mode historique (rotors persistants, saisie append-only)
 """
 def connecter_logique_chiffrement(txt_plain: tk.Text,
                                   txt_cipher: tk.Text,
                                   rotors,
                                   positions: str,
                                   plugboard,
-                                  ring_settings):
+                                  ring_settings,
+                                  stateful: bool,
+                                  lbl_positions=None):
     
+    if not stateful:
+        # MODE CLASSIQUE (RECALCUL COMPLET, EDITABLE)
+        def update_cipher(event=None):
+            text = txt_plain.get("1.0", "end-1c")
 
-    def update_cipher(event=None):
-        text = txt_plain.get("1.0", "end-1c")
+            machine = MachineEnigma(
+                rotors_names=rotors,
+                positions=positions,
+                plug_pairs=plugboard,
+                reflector_preset="B",
+                ring_settings=ring_settings
+            )
 
-        machine = MachineEnigma(
-            rotors_names=rotors,
-            positions=positions,
-            plug_pairs=plugboard,
-            reflector_preset="B",
-            ring_settings=ring_settings
+            cipher = machine.encrypt(text, keep_spaces=True, group_5=False)
+
+            txt_cipher.config(state="normal")
+            txt_cipher.delete("1.0", "end")
+            txt_cipher.insert("1.0", cipher)
+            txt_cipher.config(state="disabled")
+
+        txt_plain.bind("<KeyRelease>", update_cipher)
+        return
+
+    # MODE HISTORIQUE (STATEFUL, APPEND-ONLY)
+    machine_initial_args = {
+        "rotors_names": rotors,
+        "positions": positions,
+        "plug_pairs": plugboard,
+        "reflector_preset": "B",
+        "ring_settings": ring_settings,
+    }
+    machine = MachineEnigma(**machine_initial_args)
+
+    internal_plain = ""
+
+    def maj_label_positions():
+        """Met à jour le label avec la position actuelle des rotors (lettres)."""
+        if lbl_positions is None:
+            return
+        pos_str = " ".join(
+            chr(ord("A") + r.position) for r in machine.rotors
         )
+        lbl_positions.config(text=f"Positions des rotors : {pos_str}")
 
-        cipher = machine.encrypt(text, keep_spaces=True, group_5=False)
+
+    def recompute_from_scratch():
+        """Recrée la machine et rechiffre tout caractère par caractère."""
+        nonlocal machine
+        machine = MachineEnigma(**machine_initial_args)
+        cipher = []
+        for ch in internal_plain:
+            if ch.upper() in ALPHABET:
+                cipher.append(machine.encrypt_char(ch.upper()))
+            else:
+                cipher.append(ch)
 
         txt_cipher.config(state="normal")
         txt_cipher.delete("1.0", "end")
-        txt_cipher.insert("1.0", cipher)
+        txt_cipher.insert("1.0", "".join(cipher))
         txt_cipher.config(state="disabled")
 
-    txt_plain.bind("<KeyRelease>", update_cipher)
+    def on_key(event: tk.Event):
+        nonlocal internal_plain
+
+        if event.keysym in ("Left", "Right", "Up", "Down", "Home", "End"):
+            return "break"
+
+        if event.keysym == "BackSpace":
+            if internal_plain:
+                internal_plain = internal_plain[:-1]
+                txt_plain.delete("end-1c", "end")
+                recompute_from_scratch()
+            return "break"
+
+        if event.keysym in ("Return", "Tab"):
+            return "break"
+
+        ch = event.char
+        if not ch:
+            return "break"
+
+        upper = ch.upper()
+
+        txt_plain.insert("end", ch)
+        internal_plain += ch
+
+        if upper in ALPHABET:
+            enc = machine.encrypt_char(upper)
+            positions_str = " ".join(chr(ord("A") + r.position) for r in machine.rotors)
+        else:
+            enc = ch
+
+        txt_cipher.config(state="normal")
+        txt_cipher.insert("end", enc)
+        txt_cipher.config(state="disabled")
+
+        # On force le scroll tout en bas
+        txt_plain.see("end")
+        txt_cipher.see("end")
+
+        maj_label_positions()
+
+        return "break"
+    
+    maj_label_positions()
+    txt_plain.bind("<KeyPress>", on_key)
+
+    
 
 """
     Entrée : config : dictionnaire de configuration Enigma
     Sortie : None
     Ouvre une fenêtre permettant d'obtenir le chiffrement Enigma en temps réel.
-    Le texte est rechiffré depuis les positions initiales à chaque frappe.
+    Le texte peut être soit :
+      - en mode classique (éditable, recalcul complet)
+      - en mode historique (stateful, rotors persistants).
     """
 def lancer_mode_temps_reel(config):
     rotors = config["rotors"]
     positions = "".join(config["positions"])
-    ring_settings = config.get("rings", [0] * len(rotors))
+    ring_settings = config.get("rings")
     plugboard = config["plugboard"]
 
-    # 1) Demander le code secret
+    # 1) Choix du mode
+    stateful = demander_mode_temps_reel()
+    if stateful is None:
+        return  # utilisateur a annulé
+
+    # 2) Demander le code secret
     secret_code = demander_code_secret()
     if secret_code is None:
         return  # utilisateur a annulé ou rien saisi
 
-    # 2) Créer la fenêtre et les widgets
-    win, txt_plain, txt_cipher = creer_fenetre_mode_reel(
+    # 3) Créer la fenêtre et les widgets
+    win, txt_plain, txt_cipher, lbl_positions = creer_fenetre_mode_reel(
         rotors=rotors,
         positions=positions,
         ring_settings=ring_settings,
         plugboard=plugboard,
-        secret_code=secret_code
+        secret_code=secret_code,
+        stateful=stateful,
     )
 
-    # 3) Connecter la logique de chiffrement temps réel
+    # 4) Connecter la logique de chiffrement temps réel
     connecter_logique_chiffrement(
         txt_plain=txt_plain,
         txt_cipher=txt_cipher,
         rotors=rotors,
         positions=positions,
         ring_settings=ring_settings,
-        plugboard=plugboard
+        plugboard=plugboard,
+        stateful=stateful,
+        lbl_positions=lbl_positions
     )
-
-    # Focus dans le texte clair et attente de fermeture
     txt_plain.focus_set()
     root.wait_window(win)
