@@ -21,7 +21,7 @@ class Plugboard:
 
         est_liste_paires_valides(paires)
         
-        lettres_utilisees = set()
+        lettres_utilisees = set() 
 
         for paire in paires:
             a, b = paire[0].upper(), paire[1].upper()

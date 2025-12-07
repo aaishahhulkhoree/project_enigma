@@ -2,7 +2,7 @@ import tkinter as tk
 from tkinter import messagebox, simpledialog, ttk
 
 root = tk.Tk()
-root.withdraw()  # Cacher la fenêtre principale
+root.withdraw() 
 
 def center_window(win):
     win.update_idletasks()  # met à jour la taille réelle de la fenêtre
