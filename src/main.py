@@ -1,20 +1,12 @@
-"""
-Point d'entrée automatique de la machine Enigma.
-- Si aucun argument fourni, on charge la configuration du jour depuis data/livre_code.json
-- Sinon, on accepte les options (--date, --rotors, etc.)
-"""
-
 import sys
 import os
 from datetime import date
 import argparse
 import json
 
-# --- mettre src/ dans sys.path pour éviter conflits de "utils" ---
-sys.path.insert(0, os.path.dirname(__file__))
-
-from components.machineEnigma import MachineEnigma
 from configuration.configuration import load_codebook
+from components.menu import Menu
+from core.machineEnigma import MachineEnigma
 
 
 def charger_config_auto(codebook_path: str):
@@ -61,7 +53,6 @@ def main():
 
 if __name__ == "__main__":
     if len(sys.argv) == 1:
-        from components.menu import Menu
         Menu.main_menu()
     else:
         main()

@@ -1,8 +1,8 @@
 import math 
 
-from components.ui import show_error, popup_menu, input_dialog, afficher_resultat_avec_complexite
-from components.machineEnigma import MachineEnigma
-from components.configEnigma import (demander_rotors,demander_positions,demander_plugboard,demander_nb_rotors_livre,charger_config_livre_code)
+from ui.ui import show_error, popup_menu, input_dialog, afficher_resultat_avec_complexite
+from core.machineEnigma import MachineEnigma
+from configuration.configEnigma import (demander_rotors,demander_positions,demander_plugboard,demander_nb_rotors_livre,charger_config_livre_code)
 from components.realtime import lancer_mode_temps_reel
 
 

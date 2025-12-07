@@ -3,7 +3,7 @@ import os
 import json
 from datetime import date
 
-from components.ui import show_info,show_error,demander_rotors_gui,demander_positions_gui,input_dialog
+from ui.ui import show_info,show_error,demander_rotors_gui,demander_positions_gui,input_dialog
 from configuration.configuration import load_codebook
 
 # -------------------------------------------
@@ -187,7 +187,7 @@ def charger_config_livre_code(nb_rotors: int | None = None):
     Charge la config du jour depuis data/livre_code.json.
     Si nb_rotors est fourni, on tronque rotors/positions à nb_rotors.
     """
-    base_dir = os.path.dirname(os.path.dirname(__file__))  # src/
+    base_dir = os.path.dirname(os.path.dirname(__file__)) 
     codebook_path = os.path.join(base_dir, "data", "livre_code.json")
 
     with open(codebook_path, "r", encoding="utf-8") as f:
