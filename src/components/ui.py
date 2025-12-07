@@ -193,13 +193,15 @@ def demander_positions_gui(n=3):
 
     return result["values"]
 
-
+"""Entrées : 
+        title (str) : Titre de la fenêtre
+        message (str) : Message à afficher en haut
+        options (dict) : Dictionnaire clé->texte des options (ex: {"1": "Option 1", "2": "Option 2"})
+        include_back (bool) : Si True, ajoute un bouton Retour
+    Sortie : clé choisie (str) ou "R" si Retour, ou None si la fenêtre est fermée
+    Affiche une fenêtre avec un message et des boutons pour chaque option"""
 def popup_menu(title, message, options, include_back=False):
-    """
-    Affiche une fenêtre avec plusieurs boutons. 
-    Retourne la clé de l'option choisie (ex: "1", "2").
-    Retourne "R" si le bouton Retour est cliqué.
-    """
+
     win = tk.Toplevel(root)
     win.title(title)
     win.resizable(False, False)
@@ -235,6 +237,7 @@ def popup_menu(title, message, options, include_back=False):
 
     result = {"choice": None}
 
+    # Sous-fonction appelée lors du clic sur un bouton
     def make_choice(k):
         result["choice"] = k
         win.destroy()
@@ -246,6 +249,13 @@ def popup_menu(title, message, options, include_back=False):
     if include_back:
         btn_back = ttk.Button(win, text="Retour", style="Return.TButton", command=lambda: make_choice("R"))
         btn_back.pack(pady=(0, 15))
+
+    # Sous-fonction appelée lors de la fermeture de la fenêtre
+    def on_close():
+        if messagebox.askokcancel("Quitter", "Etes-vous sur de vouloir quitter ?", parent=win):
+            result["choice"] = None
+            win.destroy()
+    win.protocol("WM_DELETE_WINDOW", on_close)
 
     root.wait_window(win)
     return result["choice"]

@@ -1,8 +1,9 @@
 import math 
 
-from components.ui import show_info, show_error, popup_menu, input_dialog, afficher_resultat_avec_complexite
+from components.ui import show_error, popup_menu, input_dialog, afficher_resultat_avec_complexite
 from components.machineEnigma import MachineEnigma
 from components.configEnigma import (demander_rotors,demander_positions,demander_plugboard,demander_nb_rotors_livre,charger_config_livre_code)
+from components.realtime import lancer_mode_temps_reel
 
 
 class Menu:
@@ -72,12 +73,13 @@ class Menu:
             {
                 "1": "Chiffrer un message",
                 "2": "Déchiffrer un message",
-                "3": "Quitter"
+                "3": "Mode temps réel",
+                "4": "Quitter",
             },
             include_back=False
         )
         if choix is None:
-            return "3"
+            return "4"  # Considérer comme quitter si la fenêtre est fermée
         return choix
 
     @staticmethod
@@ -250,8 +252,15 @@ class Menu:
                 if config is None:
                     continue
                 Menu.lancer_machine(config, mode="déchiffrer")
-
+            
             elif choix == "3":
+                #show_info("Mode temps réel", "Cette fonctionnalité n'est pas encore implémentée.")
+                config = Menu.menu_chiffrement() # on réutilise le menu de chiffrement 
+                if config is None:
+                    continue
+                lancer_mode_temps_reel(config)
+
+            elif choix == "4":
                 Menu.quitter()
             else:
                 show_error("Choix invalide", "Choix invalide. Réessayez.")
