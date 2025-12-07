@@ -2,7 +2,7 @@
 
 Auteur : Aaïshah HULKHOREE  
 Langage : Python 3.8+  
-But : Simuler les mécanismes fondamentaux de la machine Enigma (plugboard, rotors, réflecteur) pour chiffrer/déchiffrer des messages à des fins pédagogiques.
+But : Simuler de façon pédagogique les mécanismes fondamentaux de la machine Enigma (plugboard, rotors, réflecteur) pour chiffrer/déchiffrer des messages à des fins pédagogiques.
 
 ---
 
@@ -49,17 +49,17 @@ project_enigma/
 │ │ ├─ menu.py
 │ │ └─ realtime.py
 │ ├─ configuration/
-│ │ └─ configEnigma.py
-│ │ ├─ configuration.py
-| ├─ core/
+│ │ ├─ configEnigma.py
+│ │ └─ configuration.py
+│ ├─ core/
 │ │ ├─ machineEnigma.py
 │ │ ├─ plugboard.py  
 │ │ ├─ reflecteur.py
 │ │ ├─ rotors.py
 │ ├─ data/
-│ │ ├─ livre_code.json
-| ├─ ui/
-│ │ ├─ ui.py
+│ │ └─ livre_code.json
+│ ├─ ui/
+│ │ └─ ui.py
 │ ├─ utils/
 │ │ ├─ formatage.py
 │ │ └─ nettoyage.py
@@ -70,8 +70,11 @@ project_enigma/
 
 Fonctionnalités
 --------------
-- Encrytion / décryption symétrique (même méthode).
-- Support de configuration par "livre de code" (fichier JSON).
+- Chiffrement/ déchiffrement symétrique.
+- Plugboard jusqu'à 10 paires de connexion (et non 13 paires car la machine Enigma de l'époque n'en avais que 10).
+- Rotors historiques I-VIII
+- Stepping UKW A, B et C
+- Chargement automatique via un livre de code (fichier JSON). Attention, disponible seulement jusqu'à début janvier 2026. 
 - Interface graphique légère (popups Tkinter) et menu interactif.
 - Nettoyage de texte et groupage en blocs de 5 pour présentation.
 
@@ -115,18 +118,18 @@ Usage
 
 Composants principaux & API
 ---------------------------
-- Machine principale : [`components.machineEnigma.MachineEnigma`](src/components/machineEnigma.py) — class qui orchestre plugboard, rotors et réflecteur.
-- Plugboard : [`components.plugboard.Plugboard`](src/components/plugboard.py)
-- Réflecteur : [`components.reflecteur.Reflecteur`](src/components/reflecteur.py)
-- Rotors : [`components.rotors.Rotor`](src/components/rotors.py), créateur : [`components.rotors.create_rotor`](src/components/rotors.py), utilitaire stepping : [`components.rotors.step_triple_rotors`](src/components/rotors.py)
+- Machine principale : [`core.machineEnigma.MachineEnigma`](src/core/machineEnigma.py) — class qui orchestre plugboard, rotors et réflecteur.
+- Plugboard : [`core.plugboard.Plugboard`](src/core/plugboard.py)
+- Réflecteur : [`core.reflecteur.Reflecteur`](src/core/reflecteur.py)
+- Rotors : [`core.rotors.Rotor`](src/core/rotors.py), créateur : [`core.rotors.create_rotor`](src/core/rotors.py), utilitaire stepping : [`core.rotors.step_triple_rotors`](src/core/rotors.py)
 - Config / livre de code : [`configuration.configuration.load_codebook`](src/configuration/configuration.py), parse positions : [`configuration.configuration.parse_positions`](src/configuration/configuration.py), définitions : [`configuration.configuration.ROTORS`](src/configuration/configuration.py), [`configuration.configuration.REFLECTORS`](src/configuration/configuration.py)
-- Menu & GUI : [`components.menu.Menu`](src/components/menu.py), GUI helpers : [`components.ui.demander_rotors_gui`](src/components/ui.py), [`components.ui.demander_positions_gui`](src/components/ui.py), [`components.ui.popup_menu`](src/components/ui.py), [`components.ui.input_dialog`](src/components/ui.py)
+- Menu & GUI : [`components.menu.Menu`](src/components/menu.py), GUI helpers : [`ui.ui.demander_rotors_gui`](src/ui/ui.py), [`ui.ui.demander_positions_gui`](src/ui/ui.py), [`components.ui.popup_menu`](src/ui/ui.py), [`ui.ui.input_dialog`](src/ui/ui.py)
 - Utilitaires texte : [`utils.formatage.only_letters`](src/utils/formatage.py), [`utils.formatage.group5`](src/utils/formatage.py)
 - Validation : [`utils.nettoyage.est_liste_paires_valides`](src/utils/nettoyage.py), [`utils.nettoyage.est_majuscule`](src/utils/nettoyage.py)
 
 Détails techniques & formules
 -----------------------------
-- Le stepping suit le double-stepping classique étendu à 3..8 rotors (voir logique dans [`components.machineEnigma.MachineEnigma._step_rotors`](src/components/machineEnigma.py)).
+- Le stepping suit le double-stepping classique étendu à 3..8 rotors. 
 - Espace de clés approximatif :
   - permutations d'ordre des rotors: par exemple pour n rotors pris depuis 8 disponibles → P(8,n)
   - positions initiales: $26^n$
@@ -135,18 +138,15 @@ Détails techniques & formules
 
 Fichiers utiles
 ---------------
-- [src/main.py](src/main.py) — entrée CLI & auto-load du livre de code  
-- [src/components/machineEnigma.py](src/components/machineEnigma.py) — machine ; méthode principale : [`components.machineEnigma.MachineEnigma.encrypt`](src/components/machineEnigma.py)  
-- [src/components/plugboard.py](src/components/plugboard.py) — gestion plugboard  
-- [src/components/rotors.py](src/components/rotors.py) — logique du rotor  
-- [src/components/reflecteur.py](src/components/reflecteur.py) — reflecteur (UKW presets)  
-- [src/components/menu.py](src/components/menu.py) — menu GUI principal  
-- [src/components/configEnigma.py](src/components/configEnigma.py) — assistants de configuration & lecture du livre de code  
-- [src/data/livre_code.json](src/data/livre_code.json) — configurations journalières d'exemple  
-- [src/utils/formatage.py](src/utils/formatage.py), [src/utils/nettoyage.py](src/utils/nettoyage.py) — nettoyage / validation
+- src/main.py — entrée principale CLI/GUI
+- core/machineEnigma.py — cœur du chiffrement
+- core/rotors.py — logique du rotor
+- core/plugboard.py — permutation entrée/sortie
+- configuration/configuration.py — gestion du livre de code
+- data/livre_code.json — configurations journalières d’exemple
+- utils/ — nettoyage & validation
 
 Licence & crédits
 -----------------
 Projet éducatif — crédits à l'auteur mentionnée en entête. Voir [requirements.txt](requirements.txt) pour dépendances minimales.
-
 © 2025 – Project Enigma Python
