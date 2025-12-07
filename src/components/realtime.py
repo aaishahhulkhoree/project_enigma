@@ -1,7 +1,7 @@
 import tkinter as tk
 
-from components.ui import root, center_window, show_info, show_error, input_dialog
-from components.machineEnigma import MachineEnigma
+from ui.ui import root, center_window, show_info, show_error, input_dialog
+from core.machineEnigma import MachineEnigma
 
 
 """ Entrée : None 

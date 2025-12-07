@@ -1,8 +1,8 @@
 from typing import List
 
-from components.plugboard import Plugboard
-from components.reflecteur import Reflecteur
-from components.rotors import create_rotor, Rotor
+from core.plugboard import Plugboard
+from core.reflecteur import Reflecteur
+from core.rotors import create_rotor, Rotor
 from configuration.configuration import ALPHABET
 from utils.formatage import only_letters, group5
 
