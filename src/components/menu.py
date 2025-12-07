@@ -15,6 +15,7 @@ class Menu:
         (nombre de clés possibles) en fonction :
         - de l'ordre des rotors,
         - des positions initiales,
+        - ring setting, 
         - du plugboard.
         Retourne un texte explicatif.
         """
@@ -30,7 +31,10 @@ class Menu:
         # 2) positions initiales possibles : 26^n
         positions_factor = 26 ** n_rotors
 
-        # 3) combinaisons de plugboard (formule classique Enigma)
+        # 3) ring settings possibles : 26^n
+        ring_factor = 26 ** n_rotors
+
+        # 4) combinaisons de plugboard (formule classique Enigma)
         p = nb_paires
         if p == 0:
             plugboard_configs = 1
@@ -39,7 +43,7 @@ class Menu:
                 (2 ** p) * math.factorial(p) * math.factorial(26 - 2 * p)
             )
 
-        espace_cles = perm_rotors * positions_factor * plugboard_configs
+        espace_cles = perm_rotors * positions_factor * ring_factor * plugboard_configs
 
         # Logs pour avoir des exposants lisibles
         log10_k = math.log10(espace_cles)
@@ -55,6 +59,7 @@ class Menu:
         texte = (
             f"Nombre de rotors utilisés : {n_rotors}\n"
             f"Nombre de paires de plugboard : {nb_paires}\n\n"
+            f"Ring settings possibles : 26^{n_rotors} possibilités \n"
             "Espace de clés approximatif (nombre de configurations possibles) :\n"
             f"- ≈ 10^{log10_k:.1f} configurations différentes\n"
             f"- soit ≈ 2^{log2_k:.1f} possibilités\n\n"
