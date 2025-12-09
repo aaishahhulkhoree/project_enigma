@@ -3,6 +3,7 @@ import tkinter as tk
 from ui.ui import root, center_window, show_info, show_error, input_dialog, popup_menu
 from core.machineEnigma import MachineEnigma
 from configuration.configuration import ALPHABET
+from utils.nettoyage import est_caractere_autorise
 
 
 """ Entrée : None 
@@ -25,15 +26,16 @@ def demander_code_secret() -> str | None:
         return None
     return secret_code
 
-
-def demander_mode_temps_reel() -> bool | None:
-    """
+""" Entrée : None
+    Sortie : bool | None
     Demande à l'utilisateur quel mode temps réel il veut utiliser.
     Retourne:
         - True  -> mode historique (stateful)
         - False -> mode classique (recalcul complet, éditable)
         - None  -> si l'utilisateur annule
     """
+def demander_mode_temps_reel() -> bool | None:
+    
     choix = popup_menu(
         "Mode temps réel",
         "Choisissez le mode de chiffrement temps réel :",
@@ -49,8 +51,6 @@ def demander_mode_temps_reel() -> bool | None:
     if choix == "2":
         return True
     return False
-
-
 
 """ Entrée : 
         rotors : liste des noms de rotors
@@ -194,6 +194,30 @@ def connecter_logique_chiffrement(txt_plain: tk.Text,
         def update_cipher(event=None):
             text = txt_plain.get("1.0", "end-1c")
 
+            clean_chars = []
+            invalid = set()
+            for ch in text:
+                if ch in ("\n", "\r", "\t"):
+                    clean_chars.append(" ")
+                    continue
+                if est_caractere_autorise(ch):
+                    clean_chars.append(ch)
+                else:
+                    invalid.add(ch)
+
+            if invalid:
+                txt_plain.delete("1.0", "end")
+                txt_plain.insert("1.0", "".join(clean_chars))
+                chars = " ".join(sorted(repr(c) for c in invalid))
+                show_error(
+                    "Caractères non autorisés",
+                    "Certains caractères ont été retirés car interdits :\n"
+                    f"{chars}\n\nSeules les lettres A–Z et les espaces sont autorisés."
+                )
+
+            text = "".join(clean_chars)
+
+
             machine = MachineEnigma(
                 rotors_names=rotors,
                 positions=positions,
@@ -269,6 +293,9 @@ def connecter_logique_chiffrement(txt_plain: tk.Text,
         ch = event.char
         if not ch:
             return "break"
+        
+        if not est_caractere_autorise(ch):
+            return "break"
 
         upper = ch.upper()
 
@@ -296,10 +323,7 @@ def connecter_logique_chiffrement(txt_plain: tk.Text,
     maj_label_positions()
     txt_plain.bind("<KeyPress>", on_key)
 
-    
-
-"""
-    Entrée : config : dictionnaire de configuration Enigma
+""" Entrée : config : dictionnaire de configuration Enigma
     Sortie : None
     Ouvre une fenêtre permettant d'obtenir le chiffrement Enigma en temps réel.
     Le texte peut être soit :
