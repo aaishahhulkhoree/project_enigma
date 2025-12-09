@@ -27,3 +27,14 @@ def est_liste_paires_valides(paires: Iterable[str]) -> None:
         if a in seen or b in seen:
             assertionError(f"Lettres déjà utilisées: {a!r} ou {b!r}")
         seen.update({a, b})
+
+from configuration.configuration import ALPHABET
+
+def est_caractere_autorise(ch: str) -> bool:
+    """True si le caractère est autorisé dans le texte clair."""
+    if not ch:
+        return False
+    if ch == " ":
+        return True
+    return ch.upper() in ALPHABET
+

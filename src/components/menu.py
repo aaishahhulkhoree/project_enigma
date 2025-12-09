@@ -4,9 +4,26 @@ from ui.ui import show_error, popup_menu, input_dialog, afficher_resultat_avec_c
 from core.machineEnigma import MachineEnigma
 from configuration.configEnigma import (demander_rotors,demander_positions, demander_ring_settings,demander_plugboard,demander_nb_rotors_livre,charger_config_livre_code)
 from components.realtime import lancer_mode_temps_reel
+from configuration.configuration import ALPHABET
 
 
 class Menu:
+
+    @staticmethod
+    def verifier_message(texte: str) -> tuple[bool, set[str]]:
+        """
+        Vérifie que le message ne contient que lettres A–Z et espaces.
+        Retourne (ok, ensemble_des_caractères_invalides).
+        """
+        invalid = set()
+        for ch in texte:
+            if ch in ("\n", "\r", "\t"): #on ignore les retours à la ligne et tabulations
+                continue
+            if ch == " ": #on ignore les espaces
+                continue
+            if ch.upper() not in ALPHABET:
+                invalid.add(ch)
+        return (len(invalid) == 0, invalid)
 
     @staticmethod
     def evaluer_complexite(config) -> str:
@@ -241,6 +258,18 @@ class Menu:
         texte = input_dialog("Message", f"Entrez le message à {mode} :", allow_back=True)
         if texte is None or not texte.strip():
             show_error("Erreur", "Aucun texte saisi.")
+            return
+        
+        ok, invalid = Menu.verifier_message(texte)
+        if not ok:
+            chars = " ".join(sorted(repr(c) for c in invalid))
+            show_error(
+                "Caractères non autorisés",
+                "Le message contient des caractères interdits "
+                "(accents, chiffres ou symboles).\n\n"
+                f"Caractères détectés : {chars}\n\n"
+                "Veuillez n'utiliser que les lettres A–Z et les espaces."
+            )
             return
 
         # Enigma est symétrique : même fonction pour chiffrer et déchiffrer
